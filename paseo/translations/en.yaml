@@ -1,0 +1,5 @@
+configuration:
+  ha_mcp_url:
+    name: Home Assistant MCP URL
+    description: Raw MCP endpoint URL copied from the Home Assistant MCP add-on logs.
+

@@ -1,0 +1,22 @@
+diff --git a/packages/app/app.config.js b/packages/app/app.config.js
+index 4cf5a2d..1111111 100644
+--- a/packages/app/app.config.js
++++ b/packages/app/app.config.js
+@@ -8,6 +8,7 @@ const appVariant = process.env.APP_VARIANT ?? "production";
+ const isFdroidBuild = process.env.PASEO_FDROID_BUILD === "1";
+ const isProfileBuild = process.env.PASEO_PROFILE_BUILD === "1";
+ 
++const webBaseUrl = process.env.PASEO_WEB_BASE_URL?.trim() || undefined;
+ const buildProfile = isFdroidBuild
+   ? {
+       androidPermissions: [
+@@ -157,6 +158,7 @@ export default {
+     experiments: {
+       typedRoutes: true,
+       reactCompiler: true,
+       autolinkingModuleResolution: true,
++      ...(webBaseUrl ? { baseUrl: webBaseUrl } : {}),
+     },
+     extra: {
+       fdroidBuild: isFdroidBuild,
+

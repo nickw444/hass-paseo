@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+
+fatal() {
+  echo "[FATAL] $1" >&2
+  exit 1
+}
+
+export HOME=/data/paseo-home
+export PASEO_HOME="${HOME}/.paseo"
+export CODEX_HOME="${HOME}/.codex"
+export CLAUDE_CONFIG_DIR="${HOME}/.claude"
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export XDG_DATA_HOME="${HOME}/.local/share"
+export XDG_STATE_HOME="${HOME}/.local/state"
+export PASEO_LISTEN=127.0.0.1:6767
+export PASEO_WEB_UI_ENABLED=true
+export PASEO_WEB_UI_DIST_DIR=/opt/hass-paseo-web-ui
+export PASEO_LOG_FORMAT=json
+export PASEO_LOG_LEVEL=info
+
+command -v paseo >/dev/null 2>&1 || fatal "Paseo CLI/daemon host is missing from the runtime image."
+command -v nginx >/dev/null 2>&1 || fatal "Nginx is missing from the runtime image."
+command -v bwrap >/dev/null 2>&1 || fatal "bubblewrap is missing from the runtime image."
+command -v codex >/dev/null 2>&1 || fatal "Codex CLI is missing from the runtime image."
+codex_version="$(codex --version 2>/dev/null || true)"
+[[ "${codex_version}" == codex-cli\ * ]] || fatal "Codex CLI is not the real app-server-capable binary (got: ${codex_version:-unknown})."
+codex app-server --help >/dev/null 2>&1 || fatal "Codex app-server command is unavailable."
+command -v claude >/dev/null 2>&1 || fatal "Claude Code CLI is missing from the runtime image."
+command -v opencode >/dev/null 2>&1 || fatal "OpenCode CLI is missing from the runtime image."
+command -v pi >/dev/null 2>&1 || fatal "Pi coding-agent CLI is missing from the runtime image."
+
+mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
+chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}"
+
+[[ -d /config && -w /config ]] || fatal "/config is not present or is not writable. Check the homeassistant_config map."
+
+options_file=/data/options.json
+[[ -r "${options_file}" ]] || fatal "Home Assistant options file is missing at ${options_file}."
+mcp_url="$(jq -er '.ha_mcp_url // empty' "${options_file}" 2>/dev/null || true)"
+[[ -n "${mcp_url}" ]] || fatal "ha_mcp_url is empty. Copy the raw HA-MCP URL from the HA-MCP add-on logs."
+[[ "${mcp_url}" =~ ^https?:// ]] || fatal "ha_mcp_url must use http:// or https://."
+[[ ! "${mcp_url}" =~ ^https?://(localhost|127\.0\.0\.1|\[::1\])([/:]|$) ]] || fatal "ha_mcp_url must not point at loopback from inside the container."
+
+probe_status="$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 5 --max-time 10 "${mcp_url}" 2>/dev/null || true)"
+case "${probe_status}" in
+  200|400|405|406) ;;
+  *) fatal "HA-MCP endpoint is unreachable or invalid (HTTP ${probe_status:-000})." ;;
+esac
+
+toml_url="$(jq -Rn --arg value "${mcp_url}" '$value')"
+config_tmp="$(mktemp "${CODEX_HOME}/config.toml.XXXXXX")"
+cat >"${config_tmp}" <<EOF
+approval_policy = "on-request"
+approvals_reviewer = "auto_review"
+sandbox_mode = "workspace-write"
+cli_auth_credentials_store = "file"
+
+[sandbox_workspace_write]
+writable_roots = ["/config"]
+network_access = false
+
+[projects."/config"]
+trust_level = "trusted"
+
+[mcp_servers.home_assistant]
+url = ${toml_url}
+enabled = true
+default_tools_approval_mode = "writes"
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+EOF
+chmod 600 "${config_tmp}"
+mv -f "${config_tmp}" "${CODEX_HOME}/config.toml"
+
+if [[ ! -f "${PASEO_HOME}/config.json" ]]; then
+  paseo_tmp="$(mktemp "${PASEO_HOME}/config.json.XXXXXX")"
+  cat >"${paseo_tmp}" <<'EOF'
+{
+  "$schema": "https://paseo.sh/schemas/paseo.config.v1.json",
+  "version": 1,
+  "daemon": {
+    "relay": { "enabled": false },
+    "mcp": { "enabled": true, "injectIntoAgents": true }
+  }
+}
+EOF
+  chmod 600 "${paseo_tmp}"
+  mv -f "${paseo_tmp}" "${PASEO_HOME}/config.json"
+fi
+
+cd /config
+# Reclaim a daemon left behind by an interrupted container stop. Paseo's
+# persistent PID lock is intentionally kept under PASEO_HOME. Only ask Paseo
+# to stop the prior supervisor when the recorded PID is still a Paseo process;
+# otherwise remove the stale lock (this avoids PID-reuse false positives).
+pid_file="${PASEO_HOME}/paseo.pid"
+if [[ -f "${pid_file}" ]]; then
+  lock_pid="$(jq -er '.pid // empty' "${pid_file}" 2>/dev/null || true)"
+  lock_cmd=""
+  if [[ "${lock_pid}" =~ ^[1-9][0-9]*$ && -r "/proc/${lock_pid}/cmdline" ]]; then
+    lock_cmd="$(tr '\0' ' ' <"/proc/${lock_pid}/cmdline" 2>/dev/null || true)"
+  fi
+  if [[ -z "${lock_cmd}" || "${lock_cmd}" != *paseo* ]]; then
+    rm -f "${pid_file}"
+  else
+    paseo daemon stop --force --timeout 3 >/dev/null 2>&1 || true
+  fi
+fi
+paseo daemon start --foreground >"${HOME}/paseo-daemon.log" 2>&1 &
+paseo_pid=$!
+
+cleanup() {
+  kill "${nginx_pid:-}" "${paseo_pid:-}" 2>/dev/null || true
+  wait "${nginx_pid:-}" "${paseo_pid:-}" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+
+healthy=0
+for _ in $(seq 1 60); do
+  if curl --silent --fail --max-time 2 http://127.0.0.1:6767/api/health >/dev/null 2>&1; then
+    healthy=1
+    break
+  fi
+  sleep 1
+done
+(( healthy == 1 )) || { tail -40 "${HOME}/paseo-daemon.log" >&2 || true; fatal "Paseo daemon did not become healthy."; }
+
+paseo project create /config --json >/dev/null 2>&1 || fatal "Could not register /config as a Paseo project."
+
+nginx -t -c /paseo-nginx.conf >/dev/null || fatal "Invalid Nginx configuration."
+nginx -c /paseo-nginx.conf -g 'daemon off;' &
+nginx_pid=$!
+
+while kill -0 "${paseo_pid}" 2>/dev/null && kill -0 "${nginx_pid}" 2>/dev/null; do
+  sleep 5
+done
+fatal "Paseo or Nginx exited unexpectedly."

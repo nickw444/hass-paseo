@@ -1,0 +1,32 @@
+name: Paseo
+version: "0.1.0"
+slug: paseo
+description: Paseo coding agent orchestrator for Home Assistant
+url: https://github.com/getpaseo/paseo
+arch:
+  - amd64
+  - aarch64
+
+startup: application
+boot: auto
+init: false
+backup: cold
+ingress: true
+ingress_port: 8099
+ingress_entry: /
+ingress_stream: true
+panel_admin: true
+panel_icon: mdi:robot
+
+image: ghcr.io/nickw444/{arch}-addon-hass-paseo
+
+map:
+  - type: homeassistant_config
+    read_only: false
+    path: /config
+
+options:
+  ha_mcp_url: http://homeassistant.local:8123/api/mcp
+
+schema:
+  ha_mcp_url: url

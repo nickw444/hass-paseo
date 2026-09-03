@@ -1,0 +1,11 @@
+build_from:
+  amd64: ghcr.io/home-assistant/amd64-base:3.22
+  aarch64: ghcr.io/home-assistant/aarch64-base:3.22
+args:
+  PASEO_VERSION: "0.7.2"
+  PASEO_COMMIT: "9400a49af670fdb5db4af58e73f8df98588dbea9"
+  CODEX_VERSION: "0.152.1"
+  CODEX_RELEASE_TAG: "rust-v0.152.1"
+  CLAUDE_CODE_VERSION: "2.1.259"
+  OPENCODE_VERSION: "1.18.27"
+  PI_CODING_AGENT_VERSION: "0.73.1"

@@ -1,0 +1,3 @@
+[submodule "paseo/vendor/paseo"]
+	path = paseo/vendor/paseo
+	url = https://github.com/getpaseo/paseo.git

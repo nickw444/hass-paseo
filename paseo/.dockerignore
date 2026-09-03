@@ -1,0 +1,14 @@
+vendor/paseo/.git
+vendor/paseo/.github
+vendor/paseo/.agents
+vendor/paseo/.claude
+vendor/paseo/.dev
+vendor/paseo/.expo
+vendor/paseo/.paseo
+vendor/paseo/**/node_modules
+vendor/paseo/**/dist
+vendor/paseo/**/build
+vendor/paseo/**/*.tsbuildinfo
+vendor/paseo/.env*
+vendor/paseo/**/*.pem
+

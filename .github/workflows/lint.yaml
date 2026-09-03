@@ -1,0 +1,25 @@
+name: Lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Shell syntax
+        run: bash -n paseo/run.sh paseo/tests/test_static.sh paseo/tests/test_ingress_rewrite.sh
+      - name: Static checks
+        run: paseo/tests/test_static.sh
+      - name: Ingress rewrite checks
+        run: paseo/tests/test_ingress_rewrite.sh
+      - uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: './paseo'
+      - uses: frenck/action-addon-linter@v2.21.0
+        with:
+          path: ./paseo
