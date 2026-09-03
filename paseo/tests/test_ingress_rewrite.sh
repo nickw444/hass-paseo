@@ -12,8 +12,8 @@ first="$(rewrite /api/hassio_ingress/paseo)"
 second="$(rewrite /api/hassio_ingress/paseo-session-2)"
 grep -q '/api/hassio_ingress/paseo/_expo' <<<"${first}"
 grep -q '/api/hassio_ingress/paseo-session-2/_expo' <<<"${second}"
-! grep -q "${sentinel}" <<<"${first}${second}"
-! grep -q 'paseo-session-2' <<<"${first}"
+if grep -q "${sentinel}" <<<"${first}${second}"; then exit 1; fi
+if grep -q 'paseo-session-2' <<<"${first}"; then exit 1; fi
 grep -q 'ws://host/api/hassio_ingress/paseo/ws' <<<"${first}"
 
 if command -v nginx >/dev/null 2>&1; then

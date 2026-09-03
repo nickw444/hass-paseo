@@ -33,6 +33,8 @@ codex remote-control --help >/dev/null 2>&1 || fatal "Codex Remote Control comma
 command -v claude >/dev/null 2>&1 || fatal "Claude Code CLI is missing from the runtime image."
 command -v opencode >/dev/null 2>&1 || fatal "OpenCode CLI is missing from the runtime image."
 command -v pi >/dev/null 2>&1 || fatal "Pi coding-agent CLI is missing from the runtime image."
+codex_version_pin="${CODEX_VERSION:-}"
+[[ -n "${codex_version_pin}" ]] || fatal "CODEX_VERSION is not set in the runtime image."
 
 mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
 chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}"
@@ -114,14 +116,14 @@ prepare_codex_managed_layout() {
     *) fatal "Unsupported container architecture: $(uname -m)." ;;
   esac
   managed_root="${CODEX_HOME}/packages/standalone"
-  managed_release="${managed_root}/releases/${CODEX_VERSION}-${target}"
+  managed_release="${managed_root}/releases/${codex_version_pin}-${target}"
   if [[ ! -x "${managed_release}/bin/codex" || ! -x "${managed_release}/codex-resources/bwrap" ]]; then
     rm -rf "${managed_release}"
     mkdir -p "${managed_root}/releases"
     cp -a /opt/codex "${managed_release}"
     ln -sfn bin/codex "${managed_release}/codex"
   fi
-  ln -sfn "releases/${CODEX_VERSION}-${target}" "${managed_root}/current"
+  ln -sfn "releases/${codex_version_pin}-${target}" "${managed_root}/current"
   chmod 700 "${CODEX_HOME}/packages" "${managed_root}" "${managed_root}/releases" "${managed_release}"
 }
 
@@ -145,6 +147,8 @@ fi
 paseo daemon start --foreground >"${HOME}/paseo-daemon.log" 2>&1 &
 paseo_pid=$!
 
+# The cleanup function is invoked indirectly by the EXIT/INT/TERM trap.
+# shellcheck disable=SC2329
 cleanup() {
   if (( remote_control_cleanup_needed == 1 )); then
     codex remote-control stop >/dev/null 2>&1 || true
