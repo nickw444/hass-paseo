@@ -4,6 +4,13 @@ This repository packages [Paseo](https://github.com/getpaseo/paseo) as a Home As
 
 This is a proof of concept. Back up Home Assistant before allowing an agent to edit `/config`.
 
+## Licensing
+
+The original Home Assistant add-on and integration material is MIT-licensed
+to Nick Whyte. Paseo and the Paseo-derived patches retain their upstream
+Apache-2.0 licensing and attribution; see [NOTICE](NOTICE) and
+[`paseo/vendor/paseo/LICENSE`](paseo/vendor/paseo/LICENSE).
+
 ## Install
 
 Add this repository to the Home Assistant add-on store, install **Paseo**, and start it. The add-on is administrator-only and is exposed through the Home Assistant sidebar; no host port is published.

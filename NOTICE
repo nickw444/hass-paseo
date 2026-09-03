@@ -1,0 +1,17 @@
+This repository contains original Home Assistant add-on integration work by
+Nick Whyte, licensed under the MIT License in LICENSE.
+
+The repository also includes and redistributes the following separate work:
+
+* paseo/vendor/paseo is the Paseo project, pinned as a Git submodule at the
+  revision recorded by this repository. Paseo is Copyright (c) 2025-present
+  Mohamed Boudra and is licensed under the Apache License, Version 2.0, except
+  for its own third-party components. See paseo/vendor/paseo/LICENSE.
+* paseo/patches contains changes applied to Paseo's source. Those Paseo-derived
+  changes remain subject to the Apache License, Version 2.0 and its notice,
+  attribution, modification, and redistribution requirements. The patches do
+  not relicense the upstream Paseo source.
+
+The MIT license in LICENSE does not replace or limit the licenses of Paseo or
+any other third-party component. When redistributing a build that includes
+Paseo, retain the applicable upstream license and attribution notices.
