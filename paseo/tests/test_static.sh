@@ -32,7 +32,7 @@ grep -q 'codex remote-control start --json' "${root}/run.sh"
 grep -q 'codex app-server daemon version' "${root}/run.sh"
 grep -q 'packages/standalone' "${root}/run.sh"
 if grep -q 'codex remote-control pair' "${root}/run.sh"; then exit 1; fi
-if grep -q 'codex login --device-auth' "${root}/run.sh"; then exit 1; fi
+if grep -Eq '^[[:space:]]*codex login --device-auth' "${root}/run.sh"; then exit 1; fi
 grep -q 'command -v claude' "${root}/run.sh"
 grep -q 'command -v opencode' "${root}/run.sh"
 grep -q 'command -v pi' "${root}/run.sh"
