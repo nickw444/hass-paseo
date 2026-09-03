@@ -10,3 +10,5 @@
   workspace sandbox.
 - Added optional Home Assistant MCP configuration and terminal-driven Codex
   Remote Control startup.
+- Added Debian coding utilities including ripgrep, fd, yq, Python virtual
+  environments, rsync, archive tools, and file inspection helpers.

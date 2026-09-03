@@ -52,7 +52,9 @@ ENV HOME=/data/paseo-home \
     ONNXRUNTIME_NODE_INSTALL=skip
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ca-certificates curl git jq nginx openssh-client procps patch file ripgrep bubblewrap \
+      bash bzip2 bubblewrap ca-certificates coreutils curl diffutils fd-find file \
+      findutils gawk git grep jq less nginx openssh-client patch procps python3 \
+      python3-venv ripgrep rsync sed tar tree unzip xz-utils yq zip \
     && rm -rf /var/lib/apt/lists/*
 
 # The web bundle is only the browser half of Paseo.  Assert that the runtime
@@ -61,7 +63,12 @@ RUN set -eux; \
     command -v paseo; \
     paseo --version | grep -F "${PASEO_VERSION}"
 
-RUN command -v bwrap
+RUN set -eux; \
+    ln -s /usr/bin/fdfind /usr/local/bin/fd; \
+    for command in bash bzip2 bwrap curl diff fd file find gawk git grep jq less patch \
+      python3 rg rsync sed tar tree unzip yq zip; do \
+      command -v "${command}"; \
+    done
 
 RUN set -eux; \
     case "${BUILD_ARCH}" in \

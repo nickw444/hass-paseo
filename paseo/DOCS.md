@@ -72,6 +72,16 @@ its own native login or API configuration; installing a CLI does not
 authenticate it automatically. Codex login is performed from the Paseo
 terminal as described above.
 
+## Agent tooling
+
+The image includes a compact Debian Bookworm toolset for normal coding and
+Home Assistant maintenance: `rg`, `grep`, `sed`, `awk`, `fd`, `find`, `file`,
+`patch`, `diff`, `jq`, `yq`, `git`, `ssh`, `rsync`, `python3` with virtual
+environments, `tree`, `less`, and common tar/zip/bzip2/xz utilities. `fd` is
+provided as a compatibility alias for Debian's `fdfind`. These tools do not
+change the Codex policy: Codex agents remain restricted to `/config` for
+writes and have network access disabled.
+
 ## Troubleshooting
 
 - If startup reports an unreachable MCP endpoint, check the raw URL and ensure it is reachable from an add-on container.
