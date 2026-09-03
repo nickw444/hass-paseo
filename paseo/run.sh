@@ -17,6 +17,10 @@ export XDG_CACHE_HOME="${HOME}/.cache"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
 export PASEO_LISTEN=127.0.0.1:6767
+# Home Assistant ingress preserves the browser's external Host header. The
+# daemon therefore must accept that authority; Nginx remains restricted to
+# Supervisor ingress traffic and the daemon is still loopback-only.
+export PASEO_HOSTNAMES=true
 export PASEO_WEB_UI_ENABLED=true
 export PASEO_WEB_UI_DIST_DIR=/opt/hass-paseo-web-ui
 export PASEO_LOG_FORMAT=json

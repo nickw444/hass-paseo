@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1
+
+- Allow Home Assistant ingress to forward its external Host header while
+  retaining the Supervisor-only Nginx boundary.
+
 ## 0.1.0
 
 - Initial Home Assistant ingress POC for Paseo.
