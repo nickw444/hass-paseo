@@ -44,6 +44,13 @@ grep -q 'sub_filter_types text/css application/javascript text/javascript applic
 grep -q '__PASEO_INITIAL_DAEMON_CONNECTION__' "${root}/nginx.conf"
 grep -q 'PASEO_COMMIT: "9400a49af670fdb5db4af58e73f8df98588dbea9"' "${root}/build.yaml"
 grep -q 'daemon-endpoints.ingress.test.ts' "${root}/patches/0002-ingress-websocket-path.patch"
+workflow="${root}/../.github/workflows/build.yaml"
+grep -q 'submodules: recursive' "${workflow}"
+grep -q 'packages: write' "${workflow}"
+grep -q 'linux/amd64' "${workflow}"
+grep -q 'linux/arm64' "${workflow}"
+grep -q 'inputs.version' "${workflow}"
+grep -q 'GITHUB_REPOSITORY_OWNER.*addon-hass-paseo' "${workflow}"
 
 if [[ -f "${root}/vendor/paseo/.git" || -d "${root}/vendor/paseo/.git" ]]; then
   test "$(git -C "${root}/vendor/paseo" rev-parse HEAD)" = "9400a49af670fdb5db4af58e73f8df98588dbea9"
