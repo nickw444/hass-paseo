@@ -12,7 +12,7 @@ backup: cold
 ingress: true
 ingress_entry: /
 ingress_stream: true
-panel_icon: mdi:robot
+panel_icon: mdi:code-braces
 
 image: ghcr.io/nickw444/{arch}-addon-hass-paseo
 

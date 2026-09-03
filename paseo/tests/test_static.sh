@@ -10,6 +10,7 @@ if grep -q 'Nick Watts' "${root}/../LICENSE" "${root}/../NOTICE"; then exit 1; f
 grep -q 'Apache License, Version 2.0' "${root}/../NOTICE"
 test -f "${root}/vendor/paseo/LICENSE"
 grep -q '^ingress: true$' "${root}/config.yaml"
+grep -q '^panel_icon: mdi:code-braces$' "${root}/config.yaml"
 if grep -q '^ingress_port:' "${root}/config.yaml"; then exit 1; fi
 if grep -q '^panel_admin:' "${root}/config.yaml"; then exit 1; fi
 grep -q 'type: homeassistant_config' "${root}/config.yaml"
