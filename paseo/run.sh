@@ -45,7 +45,7 @@ options_file=/data/options.json
 [[ -r "${options_file}" ]] || fatal "Home Assistant options file is missing at ${options_file}."
 mcp_url="$(jq -er '.ha_mcp_url // empty' "${options_file}" 2>/dev/null || true)"
 if jq -e 'has("codex_remote_control")' "${options_file}" >/dev/null 2>&1; then
-  remote_enabled="$(jq -er '.codex_remote_control' "${options_file}")"
+  remote_enabled="$(jq -r '.codex_remote_control' "${options_file}")"
 else
   remote_enabled=true
 fi
