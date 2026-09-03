@@ -8,4 +8,5 @@
   Claude Code, OpenCode, and Pi provider CLIs.
 - Added persistent XDG/provider state directories and bubblewrap for Codex's
   workspace sandbox.
-- Added Codex provider and Home Assistant MCP configuration.
+- Added optional Home Assistant MCP configuration and terminal-driven Codex
+  Remote Control startup.

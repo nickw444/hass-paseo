@@ -26,7 +26,8 @@ map:
     path: /config
 
 options:
-  ha_mcp_url: http://homeassistant.local:8123/api/mcp
+  codex_remote_control: true
 
 schema:
-  ha_mcp_url: url
+  ha_mcp_url: url?
+  codex_remote_control: bool

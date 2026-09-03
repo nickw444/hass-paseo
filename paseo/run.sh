@@ -29,6 +29,7 @@ command -v codex >/dev/null 2>&1 || fatal "Codex CLI is missing from the runtime
 codex_version="$(codex --version 2>/dev/null || true)"
 [[ "${codex_version}" == codex-cli\ * ]] || fatal "Codex CLI is not the real app-server-capable binary (got: ${codex_version:-unknown})."
 codex app-server --help >/dev/null 2>&1 || fatal "Codex app-server command is unavailable."
+codex remote-control --help >/dev/null 2>&1 || fatal "Codex Remote Control command is unavailable."
 command -v claude >/dev/null 2>&1 || fatal "Claude Code CLI is missing from the runtime image."
 command -v opencode >/dev/null 2>&1 || fatal "OpenCode CLI is missing from the runtime image."
 command -v pi >/dev/null 2>&1 || fatal "Pi coding-agent CLI is missing from the runtime image."
@@ -41,17 +42,12 @@ chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}"
 options_file=/data/options.json
 [[ -r "${options_file}" ]] || fatal "Home Assistant options file is missing at ${options_file}."
 mcp_url="$(jq -er '.ha_mcp_url // empty' "${options_file}" 2>/dev/null || true)"
-[[ -n "${mcp_url}" ]] || fatal "ha_mcp_url is empty. Copy the raw HA-MCP URL from the HA-MCP add-on logs."
-[[ "${mcp_url}" =~ ^https?:// ]] || fatal "ha_mcp_url must use http:// or https://."
-[[ ! "${mcp_url}" =~ ^https?://(localhost|127\.0\.0\.1|\[::1\])([/:]|$) ]] || fatal "ha_mcp_url must not point at loopback from inside the container."
-
-probe_status="$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 5 --max-time 10 "${mcp_url}" 2>/dev/null || true)"
-case "${probe_status}" in
-  200|400|405|406) ;;
-  *) fatal "HA-MCP endpoint is unreachable or invalid (HTTP ${probe_status:-000})." ;;
+remote_enabled="$(jq -er '.codex_remote_control // true' "${options_file}" 2>/dev/null || true)"
+case "${remote_enabled}" in
+  true|false) ;;
+  *) fatal "codex_remote_control must be true or false." ;;
 esac
 
-toml_url="$(jq -Rn --arg value "${mcp_url}" '$value')"
 config_tmp="$(mktemp "${CODEX_HOME}/config.toml.XXXXXX")"
 cat >"${config_tmp}" <<EOF
 approval_policy = "on-request"
@@ -65,6 +61,17 @@ network_access = false
 
 [projects."/config"]
 trust_level = "trusted"
+EOF
+if [[ -n "${mcp_url}" ]]; then
+  [[ "${mcp_url}" =~ ^https?:// ]] || fatal "ha_mcp_url must use http:// or https://."
+  [[ ! "${mcp_url}" =~ ^https?://(localhost|127\.0\.0\.1|\[::1\])([/:]|$) ]] || fatal "ha_mcp_url must not point at loopback from inside the container."
+  probe_status="$(curl --silent --output /dev/null --write-out '%{http_code}' --connect-timeout 5 --max-time 10 "${mcp_url}" 2>/dev/null || true)"
+  case "${probe_status}" in
+    200|400|405|406) ;;
+    *) fatal "HA-MCP endpoint is unreachable or invalid (HTTP ${probe_status:-000})." ;;
+  esac
+  toml_url="$(jq -Rn --arg value "${mcp_url}" '$value')"
+  cat >>"${config_tmp}" <<EOF
 
 [mcp_servers.home_assistant]
 url = ${toml_url}
@@ -73,6 +80,9 @@ default_tools_approval_mode = "writes"
 startup_timeout_sec = 30
 tool_timeout_sec = 120
 EOF
+else
+  echo "[INFO] Home Assistant MCP is disabled because ha_mcp_url is empty." >&2
+fi
 chmod 600 "${config_tmp}"
 mv -f "${config_tmp}" "${CODEX_HOME}/config.toml"
 
@@ -93,6 +103,28 @@ EOF
 fi
 
 cd /config
+remote_control_started=0
+remote_control_cleanup_needed=0
+
+prepare_codex_managed_layout() {
+  local target managed_root managed_release
+  case "$(uname -m)" in
+    x86_64) target=x86_64-unknown-linux-musl ;;
+    aarch64) target=aarch64-unknown-linux-musl ;;
+    *) fatal "Unsupported container architecture: $(uname -m)." ;;
+  esac
+  managed_root="${CODEX_HOME}/packages/standalone"
+  managed_release="${managed_root}/releases/${CODEX_VERSION}-${target}"
+  if [[ ! -x "${managed_release}/bin/codex" || ! -x "${managed_release}/codex-resources/bwrap" ]]; then
+    rm -rf "${managed_release}"
+    mkdir -p "${managed_root}/releases"
+    cp -a /opt/codex "${managed_release}"
+    ln -sfn bin/codex "${managed_release}/codex"
+  fi
+  ln -sfn "releases/${CODEX_VERSION}-${target}" "${managed_root}/current"
+  chmod 700 "${CODEX_HOME}/packages" "${managed_root}" "${managed_root}/releases" "${managed_release}"
+}
+
 # Reclaim a daemon left behind by an interrupted container stop. Paseo's
 # persistent PID lock is intentionally kept under PASEO_HOME. Only ask Paseo
 # to stop the prior supervisor when the recorded PID is still a Paseo process;
@@ -114,6 +146,9 @@ paseo daemon start --foreground >"${HOME}/paseo-daemon.log" 2>&1 &
 paseo_pid=$!
 
 cleanup() {
+  if (( remote_control_cleanup_needed == 1 )); then
+    codex remote-control stop >/dev/null 2>&1 || true
+  fi
   kill "${nginx_pid:-}" "${paseo_pid:-}" 2>/dev/null || true
   wait "${nginx_pid:-}" "${paseo_pid:-}" 2>/dev/null || true
 }
@@ -135,7 +170,32 @@ nginx -t -c /paseo-nginx.conf >/dev/null || fatal "Invalid Nginx configuration."
 nginx -c /paseo-nginx.conf -g 'daemon off;' &
 nginx_pid=$!
 
+if [[ "${remote_enabled}" == true ]]; then
+  if ! codex login status >/dev/null 2>&1; then
+    echo "[WARN] Codex Remote Control is enabled but Codex is not authenticated. Run 'codex login --device-auth' in Paseo's terminal, then restart the add-on." >&2
+  else
+    prepare_codex_managed_layout
+    remote_start_json="$(mktemp /tmp/codex-remote-start.XXXXXX)"
+    chmod 600 "${remote_start_json}"
+    remote_control_cleanup_needed=1
+    if ! codex remote-control start --json >"${remote_start_json}"; then
+      rm -f "${remote_start_json}"
+      fatal "Codex Remote Control failed to start."
+    fi
+    if ! jq -e '.status == "connected"' "${remote_start_json}" >/dev/null 2>&1; then
+      rm -f "${remote_start_json}"
+      fatal "Codex Remote Control did not report connected status."
+    fi
+    rm -f "${remote_start_json}"
+    remote_control_started=1
+    echo "[INFO] Codex Remote Control daemon is connected. Pair native clients manually from a Paseo terminal." >&2
+  fi
+fi
+
 while kill -0 "${paseo_pid}" 2>/dev/null && kill -0 "${nginx_pid}" 2>/dev/null; do
-  sleep 5
+  if (( remote_control_started == 1 )) && ! codex app-server daemon version >/dev/null 2>&1; then
+    fatal "Codex Remote Control daemon stopped unexpectedly."
+  fi
+  sleep 15
 done
 fatal "Paseo or Nginx exited unexpectedly."

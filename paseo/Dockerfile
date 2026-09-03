@@ -38,6 +38,7 @@ USER root
 ENV HOME=/data/paseo-home \
     PASEO_HOME=/data/paseo-home/.paseo \
     CODEX_HOME=/data/paseo-home/.codex \
+    CODEX_VERSION=${CODEX_VERSION} \
     CLAUDE_CONFIG_DIR=/data/paseo-home/.claude \
     XDG_CONFIG_HOME=/data/paseo-home/.config \
     XDG_CACHE_HOME=/data/paseo-home/.cache \

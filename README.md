@@ -8,7 +8,10 @@ This is a proof of concept. Back up Home Assistant before allowing an agent to e
 
 Add this repository to the Home Assistant add-on store, install **Paseo**, and start it. The add-on is administrator-only and is exposed through the Home Assistant sidebar; no host port is published.
 
-Set `ha_mcp_url` to the raw MCP URL printed by the Home Assistant MCP add-on. Do not use `localhost` or `127.0.0.1`; those names resolve inside the Paseo container.
+`ha_mcp_url` is optional. Set it to the raw MCP URL printed by the Home
+Assistant MCP add-on if you want Home Assistant tools; leave it blank to run
+without that MCP server. Do not use `localhost` or `127.0.0.1`; those names
+resolve inside the Paseo container.
 
 ## First login
 
@@ -20,7 +23,19 @@ codex login --device-auth
 
 Complete the displayed verification flow. The credential is stored in the persistent add-on data volume and is not recreated on every restart. The other provider CLIs likewise require their normal native login or API configuration when selected.
 
-## Remote access
+## Codex Remote Control
+
+Remote Control is enabled by default, but first requires the terminal login
+above followed by an add-on restart. Pair native clients manually from a Paseo
+terminal with:
+
+```bash
+codex remote-control pair
+```
+
+No pairing code is generated during startup.
+
+## Paseo remote access
 
 Use Paseo's normal Settings → host → Pair a device flow to enable relay access and pair a mobile or desktop client. The relay is end-to-end encrypted. Home Assistant ingress authentication and Paseo pairing are separate controls.
 

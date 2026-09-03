@@ -31,9 +31,38 @@ codex login --device-auth
 
 Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentials use `/data/paseo-home/.claude`, and OpenCode/Pi use the persistent HOME/XDG directories under `/data/paseo-home`. Paseo state and relay pairing persist below `/data/paseo-home/.paseo`.
 
+## Codex Remote Control
+
+`codex_remote_control` is enabled by default. It starts Codex's outbound
+Remote Control daemon after Codex has already been authenticated. It does not
+publish a port and it never creates a pairing code during startup.
+
+On a first install, open Paseo's terminal and run:
+
+```bash
+codex login --device-auth
+```
+
+Then restart the add-on. Once the logs report that Remote Control is
+connected, create a short-lived native-client pairing code from Paseo's
+terminal:
+
+```bash
+codex remote-control pair
+```
+
+Enter that code in the native Codex client. Treat it as a secret and do not
+paste it into add-on logs or configuration. If Remote Control is not wanted,
+disable `codex_remote_control` in the add-on configuration.
+
 ## Home Assistant MCP
 
-Copy the raw MCP endpoint from the HA-MCP add-on logs into the `ha_mcp_url` add-on option. The startup script validates and probes the endpoint without printing the URL. Codex receives the same safety policy as the reference `hass-codex` add-on: workspace writes are limited to `/config`, network access is disabled, and Home Assistant MCP writes require approval.
+`ha_mcp_url` is optional. Leave it unset or blank to disable Home Assistant
+MCP; Paseo still provides its own orchestration MCP server. When a URL is
+provided, the startup script validates and probes it without printing the
+URL. Codex receives the same safety policy as the reference `hass-codex`
+add-on: workspace writes are limited to `/config`, network access is
+disabled, and Home Assistant MCP writes require approval.
 
 Paseo injects its own capability-scoped `paseo` MCP server into launched agents while preserving the global `home_assistant` MCP server.
 
