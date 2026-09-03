@@ -5,8 +5,8 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 bash -n "${root}/run.sh"
 grep -q '^ingress: true$' "${root}/config.yaml"
-grep -q '^ingress_port: 8099$' "${root}/config.yaml"
-grep -q '^panel_admin: true$' "${root}/config.yaml"
+if grep -q '^ingress_port:' "${root}/config.yaml"; then exit 1; fi
+if grep -q '^panel_admin:' "${root}/config.yaml"; then exit 1; fi
 grep -q 'type: homeassistant_config' "${root}/config.yaml"
 grep -q 'ha_mcp_url' "${root}/config.yaml"
 grep -q 'ha_mcp_url: url?' "${root}/config.yaml"

@@ -7,15 +7,11 @@ arch:
   - amd64
   - aarch64
 
-startup: application
-boot: auto
 init: false
 backup: cold
 ingress: true
-ingress_port: 8099
 ingress_entry: /
 ingress_stream: true
-panel_admin: true
 panel_icon: mdi:robot
 
 image: ghcr.io/nickw444/{arch}-addon-hass-paseo
