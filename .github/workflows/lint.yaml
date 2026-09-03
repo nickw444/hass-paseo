@@ -20,6 +20,7 @@ jobs:
       - uses: ludeeus/action-shellcheck@2.0.0
         with:
           scandir: './paseo'
+          ignore: 'vendor'
       - uses: frenck/action-addon-linter@v2.21.0
         with:
           path: ./paseo
