@@ -46,6 +46,10 @@ No pairing code is generated during startup.
 
 Use Paseo's normal Settings → host → Pair a device flow to enable relay access and pair a mobile or desktop client. The relay is end-to-end encrypted. Home Assistant ingress authentication and Paseo pairing are separate controls.
 
+If an older installation shows `URL constructor: // is not a valid URL` in
+the browser console, update the add-on to `0.1.2` or newer so the ingress path
+normalization and Expo Router root-path fix are installed.
+
 ## Development
 
 The Paseo source is a Git submodule pinned to v0.7.2. Run the local checks with:

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2
+
+- Canonicalize and validate Home Assistant ingress paths before rewriting
+  browser responses or injecting runtime state.
+- Guard Expo Router's invalid bare `//` root path under ingress.
+- Rewrite manifest and touch-icon links beneath the active ingress prefix.
+
 ## 0.1.1
 
 - Allow Home Assistant ingress to forward its external Host header while

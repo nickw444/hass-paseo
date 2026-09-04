@@ -22,6 +22,12 @@ RUN set -eux; \
     git apply /tmp/paseo-patches/0002-ingress-websocket-path.patch; \
     npm ci
 
+RUN set -eux; \
+    test "$(node -p "require('./node_modules/expo-router/package.json').version")" = "6.0.23"; \
+    grep -Fq "const expoPath = expo.getUrlWithReactNavigationConcessions(path);" node_modules/expo-router/build/fork/getStateFromPath.js; \
+    patch --batch --forward -p1 < /tmp/paseo-patches/0003-expo-router-root-path.patch; \
+    node -e 'const fs=require("node:fs"); const s=fs.readFileSync("node_modules/expo-router/build/fork/getStateFromPath.js","utf8"); if (!s.includes("if (path === '\''//'\''")) throw new Error("router root-path patch was not applied"); if (s.includes("path.replace(/^\\\\/+/, '\''/'\''")) throw new Error("router patch is broader than the exact root guard"); if (!s.includes("protocol-relative URLs")) throw new Error("router patch rationale is missing");'
+
 RUN CI=1 EXPO_NO_TELEMETRY=1 PASEO_WEB_BASE_URL=/__PASEO_INGRESS__ npm run build:web --workspace=@getpaseo/app
 
 FROM ghcr.io/getpaseo/paseo:0.7.2

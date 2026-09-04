@@ -1,0 +1,14 @@
+diff --git a/node_modules/expo-router/build/fork/getStateFromPath.js b/node_modules/expo-router/build/fork/getStateFromPath.js
+index 1111111..2222222 100644
+--- a/node_modules/expo-router/build/fork/getStateFromPath.js
++++ b/node_modules/expo-router/build/fork/getStateFromPath.js
+@@ -78,1 +78,8 @@
+-    const expoPath = expo.getUrlWithReactNavigationConcessions(path);
++    // Home Assistant ingress can expose the application root as a duplicate
++    // leading slash after a redirect/history transition. `//` is not a valid
++    // URL with the `file:` base used below, while protocol-relative URLs such
++    // as `//example.test` must retain their normal external-link semantics.
++    if (path === '//') {
++        path = '/';
++    }
++    const expoPath = expo.getUrlWithReactNavigationConcessions(path);
