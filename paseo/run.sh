@@ -9,6 +9,10 @@ fatal() {
 }
 
 export HOME=/data/paseo-home
+# Paseo resolves its POSIX terminal command from $SHELL.  Set this explicitly
+# instead of relying on the base image's login-shell entry so every terminal
+# opened through the web UI starts in Bash.
+export SHELL=/bin/bash
 export PASEO_HOME="${HOME}/.paseo"
 export CODEX_HOME="${HOME}/.codex"
 export CLAUDE_CONFIG_DIR="${HOME}/.claude"

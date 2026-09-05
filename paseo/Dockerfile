@@ -42,6 +42,7 @@ ARG PI_CODING_AGENT_VERSION=0.73.1
 
 USER root
 ENV HOME=/data/paseo-home \
+    SHELL=/bin/bash \
     PASEO_HOME=/data/paseo-home/.paseo \
     CODEX_HOME=/data/paseo-home/.codex \
     CODEX_VERSION=${CODEX_VERSION} \

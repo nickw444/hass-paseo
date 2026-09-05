@@ -15,6 +15,10 @@ build sentinel to Home Assistant's current `X-Ingress-Path` and injects
 so the web UI connects to this daemon automatically. The patched browser
 WebSocket client applies the same dynamic ingress prefix to `/ws`.
 
+Terminals opened from the Paseo web UI start with `/bin/bash`. The container
+sets both the image `SHELL` environment and the supervisor's runtime `SHELL`
+value so Paseo's POSIX terminal resolver consistently selects Bash.
+
 ## Authentication boundaries
 
 There are three independent identities:
