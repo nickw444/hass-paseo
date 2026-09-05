@@ -1,60 +1,57 @@
 # Home Assistant Paseo
 
-This repository packages [Paseo](https://github.com/getpaseo/paseo) as a Home Assistant add-on. It embeds the Paseo web UI in Home Assistant ingress, mounts the Home Assistant configuration as `/config`, runs the real Paseo daemon, and provides Codex, Claude Code, OpenCode, and Pi as selectable agent CLIs. Codex is configured with the Home Assistant MCP server.
+This add-on integrates the [Paseo Coding Agent Orchestrator](https://github.com/getpaseo/paseo) with Home Assistant. It adds the Paseo web user interface to the Home Assistant sidebar. Use this interface to interact with coding agents. The add-on runs the Paseo daemon in the container. The add-on uses `/config` as the initial project directory.
 
-This is a proof of concept. Back up Home Assistant before allowing an agent to edit `/config`.
+## Screenshot
 
-## Licensing
+![Paseo running in the Home Assistant sidebar](docs/images/paseo-home-assistant.png)
 
-The original Home Assistant add-on and integration material is MIT-licensed
-to Nick Whyte. Paseo and the Paseo-derived patches retain their upstream
-Apache-2.0 licensing and attribution; see [NOTICE](NOTICE) and
-[`paseo/vendor/paseo/LICENSE`](paseo/vendor/paseo/LICENSE).
+## Features
+
+- Adds an administrator-only panel to the Home Assistant sidebar.
+- Serves the Paseo web user interface through Home Assistant ingress.
+- Runs the Paseo daemon and the web user interface in the same container.
+- Uses `/config` as the initial coding project.
+- Stores Paseo state and sessions in the add-on data directory.
+- Provides multiple coding-agent providers and common shell tools.
+- Supports Paseo remote-device pairing and encrypted relay access.
+- Provides an option to start the Codex Remote Control daemon for native Codex clients.
+
+The add-on does not publish a host port. Home Assistant ingress controls access to the sidebar. Paseo controls remote-device access.
 
 ## Install
 
-Add this repository to the Home Assistant add-on store, install **Paseo**, and start it. The add-on is administrator-only and is exposed through the Home Assistant sidebar; no host port is published.
+1. Copy the repository URL: `https://github.com/nickw444/hass-paseo`.
 
-`ha_mcp_url` is optional. Set it to the raw MCP URL printed by the Home
-Assistant MCP add-on if you want Home Assistant tools; leave it blank to run
-without that MCP server. Do not use `localhost` or `127.0.0.1`; those names
-resolve inside the Paseo container.
+2. In Home Assistant, go to **Settings** > **Apps**.
+3. Select **Install app** to open the app store. Older Home Assistant versions call this **Add-on Store**.
+4. Select the three-dot menu in the top-right corner.
+5. Select **Repositories**.
+6. Paste the repository URL into the repository field.
+7. Select **Add**.
+8. Find **Paseo** in the new repository.
+9. Select **Install**.
+10. Start the add-on.
+11. Open the **Paseo** panel from the Home Assistant sidebar.
 
-## First login
+The add-on supports `amd64` and `aarch64`. The add-on registers `/config` as a Paseo project. The add-on data volume preserves Paseo state, provider settings, sessions, and pairings across restarts.
 
-Paseo owns remote-device pairing. Codex owns its OpenAI provider credential. After opening the sidebar panel, open Paseo's terminal and run:
+## Home Assistant MCP
 
-```bash
-codex login --device-auth
-```
+`ha_mcp_url` is optional. Leave this option empty to disable Home Assistant MCP. Set this option to the endpoint provided by your MCP server. The add-on validates the URL at startup. The add-on does not print the URL in the logs.
 
-Complete the displayed verification flow. The credential is stored in the persistent add-on data volume and is not recreated on every restart. The other provider CLIs likewise require their normal native login or API configuration when selected.
+For setup and feature details, see the [Home Assistant MCP Server documentation](https://www.home-assistant.io/integrations/mcp_server/) and the [Home Assistant MCP project documentation](https://homeassistant-ai.github.io/ha-mcp/).
 
-## Codex Remote Control
+## Documentation
 
-Remote Control is enabled by default, but first requires the terminal login
-above followed by an add-on restart. Pair native clients manually from a Paseo
-terminal with:
-
-```bash
-codex remote-control pair
-```
-
-No pairing code is generated during startup.
-
-## Paseo remote access
-
-Use Paseo's normal Settings → host → Pair a device flow to enable relay access and pair a mobile or desktop client. The relay is end-to-end encrypted. Home Assistant ingress authentication and Paseo pairing are separate controls.
-
-If an older installation shows `URL constructor: // is not a valid URL` in
-the browser console, update the add-on to `0.1.2` or newer so the ingress path
-normalization and Expo Router root-path fix are installed.
+See [`paseo/DOCS.md`](paseo/DOCS.md) for authentication boundaries, provider setup, remote-control configuration, MCP troubleshooting, recovery, and container tooling.
 
 ## Development
 
-The Paseo source is a Git submodule pinned to v0.7.2. Run the local checks with:
+The repository includes the Paseo source as a Git submodule. Initialize the submodule before you run the local checks:
 
 ```bash
+git submodule update --init --recursive
 paseo/tests/test_static.sh
 paseo/tests/test_ingress_rewrite.sh
 ```
