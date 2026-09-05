@@ -17,6 +17,7 @@ export PASEO_HOME="${HOME}/.paseo"
 export CODEX_HOME="${HOME}/.codex"
 export CLAUDE_CONFIG_DIR="${HOME}/.claude"
 export XDG_CONFIG_HOME="${HOME}/.config"
+export GH_CONFIG_DIR="${XDG_CONFIG_HOME}/gh"
 export XDG_CACHE_HOME="${HOME}/.cache"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
@@ -41,11 +42,13 @@ codex remote-control --help >/dev/null 2>&1 || fatal "Codex Remote Control comma
 command -v claude >/dev/null 2>&1 || fatal "Claude Code CLI is missing from the runtime image."
 command -v opencode >/dev/null 2>&1 || fatal "OpenCode CLI is missing from the runtime image."
 command -v pi >/dev/null 2>&1 || fatal "Pi coding-agent CLI is missing from the runtime image."
+command -v gh >/dev/null 2>&1 || fatal "GitHub CLI is missing from the runtime image."
+gh --version >/dev/null 2>&1 || fatal "GitHub CLI is not executable."
 codex_version_pin="${CODEX_VERSION:-}"
 [[ -n "${codex_version_pin}" ]] || fatal "CODEX_VERSION is not set in the runtime image."
 
-mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
-chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}"
+mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
+chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${HOME}/.ssh"
 
 [[ -d /config && -w /config ]] || fatal "/config is not present or is not writable. Check the homeassistant_config map."
 

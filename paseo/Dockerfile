@@ -45,6 +45,7 @@ ENV HOME=/data/paseo-home \
     SHELL=/bin/bash \
     PASEO_HOME=/data/paseo-home/.paseo \
     CODEX_HOME=/data/paseo-home/.codex \
+    GH_CONFIG_DIR=/data/paseo-home/.config/gh \
     CODEX_VERSION=${CODEX_VERSION} \
     CLAUDE_CONFIG_DIR=/data/paseo-home/.claude \
     XDG_CONFIG_HOME=/data/paseo-home/.config \
@@ -58,9 +59,22 @@ ENV HOME=/data/paseo-home \
     PASEO_LOG_LEVEL=info \
     ONNXRUNTIME_NODE_INSTALL=skip
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN set -eux; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl; \
+    install -d -m 0755 /etc/apt/keyrings /etc/apt/sources.list.d; \
+    curl --fail --location --retry 3 \
+      --output /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+      https://cli.github.com/packages/githubcli-archive-keyring.gpg; \
+    echo '6084d5d7bd8e288441e0e94fc6275570895da18e6751f70f057485dc2d1a811b  /etc/apt/keyrings/githubcli-archive-keyring.gpg' | sha256sum -c -; \
+    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg; \
+    apt_arch="$(dpkg --print-architecture)"; \
+    case "${apt_arch}" in amd64|arm64) ;; *) echo "Unsupported Debian architecture: ${apt_arch}" >&2; exit 1 ;; esac; \
+    printf 'deb [arch=%s signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\n' "${apt_arch}" > /etc/apt/sources.list.d/github-cli.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
       bash bzip2 bubblewrap ca-certificates coreutils curl diffutils fd-find file \
-      findutils gawk git grep jq less nginx openssh-client patch procps python3 \
+      findutils gawk gh git grep jq less nginx openssh-client patch procps python3 \
       python3-venv ripgrep rsync sed tar tree unzip xz-utils yq zip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -72,7 +86,7 @@ RUN set -eux; \
 
 RUN set -eux; \
     ln -s /usr/bin/fdfind /usr/local/bin/fd; \
-    for command in bash bzip2 bwrap curl diff fd file find gawk git grep jq less patch \
+    for command in bash bzip2 bwrap curl diff fd file find gawk gh git grep jq less patch \
       python3 rg rsync sed tar tree unzip yq zip; do \
       command -v "${command}"; \
     done

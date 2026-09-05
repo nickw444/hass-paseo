@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4
+
+- Added the GitHub CLI for repository, issue, pull request, and GitHub API
+  workflows from the Paseo terminal.
+- Persisted GitHub CLI authentication, SSH keys, SSH configuration, and known
+  hosts in the add-on data directory.
+
 ## 0.1.3
 
 - Set Bash as the default shell for terminals opened from the Paseo web

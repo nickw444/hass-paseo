@@ -33,7 +33,20 @@ The add-on deliberately does not force Codex login during startup. Authenticate 
 codex login --device-auth
 ```
 
-Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentials use `/data/paseo-home/.claude`, and OpenCode/Pi use the persistent HOME/XDG directories under `/data/paseo-home`. Paseo state and relay pairing persist below `/data/paseo-home/.paseo`.
+Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentials use `/data/paseo-home/.claude`; and OpenCode and Pi use the persistent HOME/XDG directories under `/data/paseo-home`. Paseo state and relay pairing persist below `/data/paseo-home/.paseo`.
+
+GitHub CLI authentication uses `GH_CONFIG_DIR=/data/paseo-home/.config/gh`.
+SSH keys, SSH configuration, and `known_hosts` use `/data/paseo-home/.ssh`.
+These paths are inside the persistent add-on data directory, so they survive
+container restarts and add-on image updates. The startup script creates the
+directories and sets restrictive directory permissions. It does not generate,
+copy, or overwrite authentication files or SSH keys. Treat these paths as
+secrets and include them in the add-on backup policy.
+
+Authenticate GitHub CLI from the Paseo terminal with `gh auth login`. Select
+SSH as the Git protocol if you want GitHub CLI to use an SSH key. Use
+`--skip-ssh-key` if you want to manage the key yourself. Do not put a token in
+add-on options or logs.
 
 ## Codex Remote Control
 
@@ -80,7 +93,7 @@ terminal as described above.
 
 The image includes a compact Debian Bookworm toolset for normal coding and
 Home Assistant maintenance: `rg`, `grep`, `sed`, `awk`, `fd`, `find`, `file`,
-`patch`, `diff`, `jq`, `yq`, `git`, `ssh`, `rsync`, `python3` with virtual
+`patch`, `diff`, `jq`, `yq`, `git`, `gh`, `ssh`, `rsync`, `python3` with virtual
 environments, `tree`, `less`, and common tar/zip/bzip2/xz utilities. `fd` is
 provided as a compatibility alias for Debian's `fdfind`. These tools do not
 change the Codex policy: Codex agents remain restricted to `/config` for
