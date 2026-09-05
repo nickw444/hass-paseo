@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Set Bash as the default shell for terminals opened from the Paseo web
+  interface.
+
 ## 0.1.2
 
 - Canonicalize and validate Home Assistant ingress paths before rewriting

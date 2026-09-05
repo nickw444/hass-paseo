@@ -90,6 +90,6 @@ writes and have network access disabled.
 
 - If startup reports an unreachable MCP endpoint, check the raw URL and ensure it is reachable from an add-on container.
 - If Codex is unauthenticated, open the Paseo terminal and repeat `codex login --device-auth`.
-- If the panel is blank or the browser reports `URL constructor: // is not a valid URL`, update to add-on `0.1.2` or newer. The proxy validates Home Assistant's `X-Ingress-Path` and the web bundle contains a narrow Expo Router root-path guard. Inspect browser requests to confirm that JavaScript, CSS, manifest, and WebSocket URLs all begin with the current `/api/hassio_ingress/<token>` prefix; do not reuse a cached ingress URL after opening a new sidebar session.
+- If the panel is blank or the browser reports `URL constructor: // is not a valid URL`, update to add-on `0.1.3` or newer. The proxy validates Home Assistant's `X-Ingress-Path` and the web bundle contains a narrow Expo Router root-path guard. Inspect browser requests to confirm that JavaScript, CSS, manifest, and WebSocket URLs all begin with the current `/api/hassio_ingress/<token>` prefix; do not reuse a cached ingress URL after opening a new sidebar session.
 - Review the add-on logs for Nginx or daemon health failures. Requests without a valid Supervisor ingress source are rejected by design.
 - Back up `/config` before testing write operations.

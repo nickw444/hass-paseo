@@ -10,6 +10,7 @@ if grep -q 'Nick Watts' "${root}/../LICENSE" "${root}/../NOTICE"; then exit 1; f
 grep -q 'Apache License, Version 2.0' "${root}/../NOTICE"
 test -f "${root}/vendor/paseo/LICENSE"
 grep -q '^ingress: true$' "${root}/config.yaml"
+grep -q '^version: "0.1.3"$' "${root}/config.yaml"
 grep -q '^panel_icon: mdi:code-braces$' "${root}/config.yaml"
 if grep -q '^ingress_port:' "${root}/config.yaml"; then exit 1; fi
 if grep -q '^panel_admin:' "${root}/config.yaml"; then exit 1; fi
@@ -86,6 +87,7 @@ grep -q 'packages: write' "${workflow}"
 grep -q 'linux/amd64' "${workflow}"
 grep -q 'linux/arm64' "${workflow}"
 grep -q 'inputs.version' "${workflow}"
+grep -q 'default: "0.1.3"' "${workflow}"
 grep -q 'GITHUB_REPOSITORY_OWNER.*addon-hass-paseo' "${workflow}"
 
 if [[ -f "${root}/vendor/paseo/.git" || -d "${root}/vendor/paseo/.git" ]]; then
