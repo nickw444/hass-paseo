@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.10
+
+- Fixed add-on startup under the custom AppArmor profile by allowing the
+  supervisor script at `/run.sh` to execute.
+
 ## 0.1.9
 
 - Configured the Home Assistant MCP server for the native user configuration

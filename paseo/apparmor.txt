@@ -38,6 +38,7 @@ profile paseo flags=(attach_disconnected,mediate_deleted) {
 
   # The runtime starts Paseo, Nginx, Codex, and the provider CLIs from these
   # paths. Inherit this profile so child processes retain the same policy.
+  /run.sh rix,
   /bin/** ix,
   /usr/bin/** ix,
   /usr/local/bin/** ix,
