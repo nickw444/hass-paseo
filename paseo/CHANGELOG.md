@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7
+
+- Mapped /root/.ssh to the persistent add-on SSH directory.
+- Migrated existing root SSH files without overwriting conflicting persistent
+  files.
+- Made default ssh-keygen, SSH, Git, and known-host paths survive updates.
+
 ## 0.1.6
 
 - Added the official Home Assistant ha CLI for Supervisor management.

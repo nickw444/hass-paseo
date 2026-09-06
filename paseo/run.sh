@@ -64,6 +64,50 @@ codex_version_pin="${CODEX_VERSION:-}"
 mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
 chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh"
 
+ensure_root_ssh_path() {
+  local root_ssh=/root/.ssh
+  local persistent_ssh="${HOME}/.ssh"
+  local entry name target
+
+  [[ "${root_ssh}" != "${persistent_ssh}" ]] || return 0
+
+  if [[ -L "${root_ssh}" ]]; then
+    [[ "$(readlink -f "${root_ssh}")" == "$(readlink -f "${persistent_ssh}")" ]] || \
+      fatal "/root/.ssh points to an unexpected location."
+    return 0
+  fi
+
+  if [[ -e "${root_ssh}" ]]; then
+    [[ -d "${root_ssh}" ]] || fatal "/root/.ssh exists but is not a directory."
+
+    while IFS= read -r -d '' entry; do
+      name="${entry##*/}"
+      target="${persistent_ssh}/${name}"
+      if [[ -e "${target}" || -L "${target}" ]]; then
+        if [[ -f "${entry}" && -f "${target}" ]] && cmp -s "${entry}" "${target}"; then
+          continue
+        fi
+        fatal "Cannot migrate /root/.ssh/${name}: a different persistent file already exists."
+      fi
+    done < <(find "${root_ssh}" -mindepth 1 -maxdepth 1 -print0)
+
+    while IFS= read -r -d '' entry; do
+      name="${entry##*/}"
+      target="${persistent_ssh}/${name}"
+      if [[ -e "${target}" || -L "${target}" ]]; then
+        rm -f "${entry}"
+      else
+        mv -- "${entry}" "${target}"
+      fi
+    done < <(find "${root_ssh}" -mindepth 1 -maxdepth 1 -print0)
+    rmdir "${root_ssh}" || fatal "Could not migrate the existing /root/.ssh directory."
+  fi
+
+  ln -s "${persistent_ssh}" "${root_ssh}"
+}
+
+ensure_root_ssh_path
+
 [[ -d /config && -w /config ]] || fatal "/config is not present or is not writable. Check the homeassistant_config map."
 
 options_file=/data/options.json
