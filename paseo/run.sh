@@ -43,7 +43,6 @@ source /usr/local/lib/hass-paseo/mcp-config.sh
 
 command -v paseo >/dev/null 2>&1 || fatal "Paseo CLI/daemon host is missing from the runtime image."
 command -v nginx >/dev/null 2>&1 || fatal "Nginx is missing from the runtime image."
-command -v bwrap >/dev/null 2>&1 || fatal "bubblewrap is missing from the runtime image."
 command -v codex >/dev/null 2>&1 || fatal "Codex CLI is missing from the runtime image."
 codex_version="$(codex --version 2>/dev/null || true)"
 [[ "${codex_version}" == codex-cli\ * ]] || fatal "Codex CLI is not the real app-server-capable binary (got: ${codex_version:-unknown})."
@@ -64,26 +63,6 @@ command -v ha >/dev/null 2>&1 || fatal "Home Assistant CLI is missing from the r
 ha help >/dev/null 2>&1 || fatal "Home Assistant CLI is not executable."
 codex_version_pin="${CODEX_VERSION:-}"
 [[ -n "${codex_version_pin}" ]] || fatal "CODEX_VERSION is not set in the runtime image."
-
-check_codex_sandbox() {
-  local candidate probe_output reason
-  local -a bwrap_candidates
-  bwrap_candidates=("$(command -v bwrap)")
-  if [[ -x /opt/codex/codex-resources/bwrap ]]; then
-    bwrap_candidates+=(/opt/codex/codex-resources/bwrap)
-  fi
-
-  for candidate in "${bwrap_candidates[@]}"; do
-    probe_output="$(mktemp)"
-    if ! "${candidate}" --unshare-user --ro-bind / / --unshare-net /bin/true \
-      >/dev/null 2>"${probe_output}"; then
-      reason="$(tr '\n' ' ' <"${probe_output}" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')"
-      rm -f "${probe_output}"
-      fatal "Codex sandbox preflight failed for ${candidate}: ${reason:-unknown error}. Check that the host permits user namespaces, SYS_ADMIN, and the Paseo AppArmor profile."
-    fi
-    rm -f "${probe_output}"
-  done
-}
 
 mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${PI_CODING_AGENT_DIR}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}" "${PASEO_SCRATCH_DIR}"
 chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh"
@@ -111,7 +90,6 @@ ensure_root_ssh_path() {
 ensure_root_ssh_path
 
 [[ -d /config && -w /config ]] || fatal "/config is not present or is not writable. Check the homeassistant_config map."
-check_codex_sandbox
 
 options_file=/data/options.json
 [[ -r "${options_file}" ]] || fatal "Home Assistant options file is missing at ${options_file}."
@@ -130,12 +108,13 @@ config_tmp="$(mktemp "${CODEX_HOME}/config.toml.XXXXXX")"
 cat >"${config_tmp}" <<EOF
 approval_policy = "on-request"
 approvals_reviewer = "auto_review"
-sandbox_mode = "workspace-write"
+sandbox_mode = "danger-full-access"
 cli_auth_credentials_store = "file"
 
-[sandbox_workspace_write]
-writable_roots = ["/config", "/tmp/paseo-work"]
-network_access = false
+# Paseo launches Codex through app-server. Keep live web search enabled for
+# those sessions while Codex runs inside the add-on container boundary.
+[features]
+web_search_request = true
 
 [projects."/config"]
 trust_level = "trusted"
@@ -165,6 +144,9 @@ else
 fi
 chmod 600 "${config_tmp}"
 mv -f "${config_tmp}" "${CODEX_HOME}/config.toml"
+if ! codex features list 2>/dev/null | grep -Eq '^web_search_request[[:space:]].*true$'; then
+  fatal "Codex live web search is not enabled by the managed configuration."
+fi
 
 ensure_pi_mcp_adapter
 
@@ -197,7 +179,7 @@ prepare_codex_managed_layout() {
   esac
   managed_root="${CODEX_HOME}/packages/standalone"
   managed_release="${managed_root}/releases/${codex_version_pin}-${target}"
-  if [[ ! -x "${managed_release}/bin/codex" || ! -x "${managed_release}/codex-resources/bwrap" ]]; then
+  if [[ ! -x "${managed_release}/bin/codex" ]]; then
     rm -rf "${managed_release}"
     mkdir -p "${managed_root}/releases"
     cp -a /opt/codex "${managed_release}"

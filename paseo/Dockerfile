@@ -83,7 +83,7 @@ RUN set -eux; \
     printf 'deb [arch=%s signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\n' "${apt_arch}" > /etc/apt/sources.list.d/github-cli.list; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-      bash bzip2 bubblewrap ca-certificates coreutils curl diffutils fd-find file \
+      bash bzip2 ca-certificates coreutils curl diffutils fd-find file \
       findutils gawk gh git grep jq less nginx openssh-client patch procps python3 \
       python3-venv ripgrep rsync sed tar tree unzip xz-utils yq zip \
     && rm -rf /var/lib/apt/lists/*
@@ -96,7 +96,7 @@ RUN set -eux; \
 
 RUN set -eux; \
     ln -s /usr/bin/fdfind /usr/local/bin/fd; \
-    for command in bash bzip2 bwrap curl diff fd file find gawk gh git grep jq less patch \
+    for command in bash bzip2 curl diff fd file find gawk gh git grep jq less patch \
       python3 rg rsync sed tar tree unzip yq zip; do \
       command -v "${command}"; \
     done

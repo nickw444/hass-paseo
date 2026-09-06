@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.15
+
+- Run Codex without its nested Linux bubblewrap sandbox.
+- Removed the add-on `SYS_ADMIN` capability and custom AppArmor profile.
+- Treat the add-on container as the Codex security boundary so provider
+  runtimes can execute their native scripts and shared libraries.
+
+## 0.1.14
+
+- Enabled Codex live web search for agents launched by Paseo.
+- Kept Codex shell network access disabled; web search uses Codex's native
+  provider capability.
+
 ## 0.1.13
 
 - Allowed executable scripts under `/config` and `/tmp/paseo-work` within the

@@ -1,5 +1,5 @@
 name: Paseo
-version: "0.1.13"
+version: "0.1.15"
 slug: paseo
 description: Paseo coding agent orchestrator for Home Assistant
 url: https://github.com/getpaseo/paseo
@@ -15,9 +15,7 @@ ingress_stream: true
 panel_icon: mdi:code-braces
 hassio_api: true
 hassio_role: manager
-privileged:
-  - SYS_ADMIN
-apparmor: true
+apparmor: false
 
 image: ghcr.io/nickw444/{arch}-addon-hass-paseo
 
