@@ -15,8 +15,9 @@ This add-on integrates the [Paseo Coding Agent Orchestrator](https://github.com/
 - Stores Paseo state and sessions in the add-on data directory.
 - Provides multiple coding-agent providers, the Home Assistant ha CLI, GitHub
   CLI, and common shell tools.
-- Runs Codex with a `/config`-only workspace sandbox and a Home Assistant
-  AppArmor profile for its bubblewrap runtime.
+- Runs Codex with a `/config` workspace and an ephemeral `/tmp/paseo-work`
+  scratch directory, plus a Home Assistant AppArmor profile for its bubblewrap
+  runtime.
 - Includes Cursor and GitHub Copilot provider backends.
 - Supports Paseo remote-device pairing and encrypted relay access.
 - Provides an option to start the Codex Remote Control daemon for native Codex clients.

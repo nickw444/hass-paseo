@@ -26,6 +26,7 @@ export XDG_CACHE_HOME="${HOME}/.cache"
 export COPILOT_HOME="${HOME}/.copilot"
 export COPILOT_CACHE_HOME="${XDG_CACHE_HOME}/copilot"
 export PI_CODING_AGENT_DIR="${HOME}/.pi/agent"
+export PASEO_SCRATCH_DIR=/tmp/paseo-work
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
 export PASEO_LISTEN=127.0.0.1:6767
@@ -84,9 +85,10 @@ check_codex_sandbox() {
   done
 }
 
-mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${PI_CODING_AGENT_DIR}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
+mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${PI_CODING_AGENT_DIR}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}" "${PASEO_SCRATCH_DIR}"
 chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh"
 chmod 700 "${PI_CODING_AGENT_DIR}"
+chmod 700 "${PASEO_SCRATCH_DIR}"
 
 ensure_root_ssh_path() {
   local root_ssh=/root/.ssh
@@ -132,7 +134,7 @@ sandbox_mode = "workspace-write"
 cli_auth_credentials_store = "file"
 
 [sandbox_workspace_write]
-writable_roots = ["/config"]
+writable_roots = ["/config", "/tmp/paseo-work"]
 network_access = false
 
 [projects."/config"]

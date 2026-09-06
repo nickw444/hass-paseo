@@ -90,8 +90,9 @@ disable `codex_remote_control` in the add-on configuration.
 MCP; Paseo still provides its own orchestration MCP server. When a URL is
 provided, the startup script validates and probes it without printing the
 URL. Codex receives the same safety policy as the reference `hass-codex`
-add-on: workspace writes are limited to `/config`, network access is
-disabled, and Home Assistant MCP writes require approval.
+add-on: workspace writes are limited to `/config` and the ephemeral
+`/tmp/paseo-work` scratch directory, network access is disabled, and Home
+Assistant MCP writes require approval.
 
 When the URL is set, the add-on writes the `home_assistant` server to the
 native user configuration for each built-in provider. It preserves unrelated
@@ -152,8 +153,9 @@ Home Assistant maintenance: `rg`, `grep`, `sed`, `awk`, `fd`, `find`, `file`,
 `patch`, `diff`, `jq`, `yq`, `git`, `gh`, `ssh`, `rsync`, `python3` with virtual
 environments, `tree`, `less`, and common tar/zip/bzip2/xz utilities. `fd` is
 provided as a compatibility alias for Debian's `fdfind`. These tools do not
-change the Codex policy: Codex agents remain restricted to `/config` for
-writes and have network access disabled.
+change the Codex policy: Codex agents can write only to `/config` and the
+ephemeral `/tmp/paseo-work` scratch directory, and have network access
+disabled.
 
 ## Codex sandbox
 
@@ -167,8 +169,9 @@ container runtime, or Supervisor security policy does not allow the required
 user and network namespaces, startup stops with a diagnostic. This is safer
 than starting the panel and failing only when an agent reads a file.
 
-The Codex policy remains `workspace-write` with `/config` as the only writable
-root and network access disabled. A Home Assistant OS or Supervisor update can
+The Codex policy remains `workspace-write` with `/config` and the ephemeral
+`/tmp/paseo-work` scratch directory as writable roots, and network access
+disabled. A Home Assistant OS or Supervisor update can
 change the available namespace policy. If the preflight fails, review the
 add-on log and confirm that the installation uses a supported Home Assistant
 OS/Supervisor version and a native `amd64` or `aarch64` host. Do not work

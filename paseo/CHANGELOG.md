@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.13
+
+- Allowed executable scripts under `/config` and `/tmp/paseo-work` within the
+  add-on AppArmor profile.
+- Added `/tmp/paseo-work` as an ephemeral Codex writable root.
+
 ## 0.1.12
 
 - Allowed the Copilot JavaScript launcher to execute through its `/usr/bin/env`

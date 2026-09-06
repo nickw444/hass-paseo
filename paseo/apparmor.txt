@@ -6,8 +6,9 @@
 # than disabling AppArmor for every process in the container.
 #
 # The inner Codex sandbox remains responsible for restricting agent commands
-# to /config and for disabling network access. These rules only allow the
-# outer Paseo process to construct that inner sandbox.
+# to the configured workspace and scratch directory, and for disabling network
+# access. These rules only allow the outer Paseo process to construct that
+# inner sandbox.
 abi <abi/3.0>,
 #include <tunables/global>
 
@@ -50,7 +51,8 @@ profile paseo flags=(attach_disconnected,mediate_deleted) {
   # Runtime state, the Home Assistant project, and normal process files.
   / r,
   /** r,
-  /config/** rwk,
+  /config/** rwkix,
+  /tmp/paseo-work/** rwkix,
   /data/** rwk,
   /tmp/** rwk,
   /run/** rwk,
