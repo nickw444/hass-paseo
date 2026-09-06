@@ -43,6 +43,9 @@ ARG COPILOT_CLI_VERSION=1.0.83
 ARG CURSOR_AGENT_VERSION=2026.09.02-c22c1a3
 ARG CURSOR_AGENT_SHA256_AMD64=b73b59854762535c0fc20d7ccc51c3b5a356a851491088d60a362be48750f53c
 ARG CURSOR_AGENT_SHA256_AARCH64=fb7bc635be6172ebcf68f907fd9217e3614da51916455c6d7fdb66690997884c
+ARG HA_CLI_VERSION=5.5.0
+ARG HA_CLI_SHA256_AMD64=fb2e2177bd7bc014f029b807cd1cc7d74484ecfed1e90d5f9b2a61d65ff5393d
+ARG HA_CLI_SHA256_AARCH64=af390ab7f91a8135668ace7b1425d8e53800b6a1fc3b36fc588df701d2ab3db5
 
 USER root
 ENV HOME=/data/paseo-home \
@@ -96,6 +99,22 @@ RUN set -eux; \
       python3 rg rsync sed tar tree unzip yq zip; do \
       command -v "${command}"; \
     done
+
+# Install the official Home Assistant Supervisor CLI. The Supervisor injects
+# the authentication token at runtime; no long-lived token is stored in the
+# image or add-on data directory.
+RUN set -eux; \
+    case "${BUILD_ARCH}" in \
+      amd64) ha_asset=ha_amd64; ha_sha="${HA_CLI_SHA256_AMD64}" ;; \
+      aarch64) ha_asset=ha_aarch64; ha_sha="${HA_CLI_SHA256_AARCH64}" ;; \
+      *) echo "Unsupported BUILD_ARCH: ${BUILD_ARCH}" >&2; exit 1 ;; \
+    esac; \
+    curl --fail --location --retry 3 \
+      --output /usr/local/bin/ha \
+      "https://github.com/home-assistant/cli/releases/download/${HA_CLI_VERSION}/${ha_asset}"; \
+    printf '%s  %s\n' "${ha_sha}" /usr/local/bin/ha | sha256sum -c -; \
+    chmod 0755 /usr/local/bin/ha; \
+    ha help >/dev/null 2>&1 || { echo "Home Assistant CLI smoke test failed" >&2; exit 1; }
 
 RUN set -eux; \
     case "${BUILD_ARCH}" in \

@@ -6,7 +6,7 @@ on:
       version:
         description: Add-on version to publish (without the leading v)
         required: true
-        default: "0.1.5"
+        default: "0.1.6"
         type: string
   push:
     tags: ["v*.*.*"]
@@ -63,6 +63,9 @@ jobs:
             --build-arg CURSOR_AGENT_VERSION=2026.09.02-c22c1a3 \
             --build-arg CURSOR_AGENT_SHA256_AMD64=b73b59854762535c0fc20d7ccc51c3b5a356a851491088d60a362be48750f53c \
             --build-arg CURSOR_AGENT_SHA256_AARCH64=fb7bc635be6172ebcf68f907fd9217e3614da51916455c6d7fdb66690997884c \
+            --build-arg HA_CLI_VERSION=5.5.0 \
+            --build-arg HA_CLI_SHA256_AMD64=fb2e2177bd7bc014f029b807cd1cc7d74484ecfed1e90d5f9b2a61d65ff5393d \
+            --build-arg HA_CLI_SHA256_AARCH64=af390ab7f91a8135668ace7b1425d8e53800b6a1fc3b36fc588df701d2ab3db5 \
             --tag "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${ARCH}-addon-hass-paseo:${VERSION}" \
             --tag "ghcr.io/${GITHUB_REPOSITORY_OWNER}/${ARCH}-addon-hass-paseo:latest" \
             --push \

@@ -27,6 +27,18 @@ There are three independent identities:
 2. Paseo authenticates paired remote devices and its encrypted relay relationship.
 3. Codex authenticates the OpenAI/Codex provider.
 
+The container also includes the official Home Assistant ha CLI. The add-on
+requests hassio_api: true with the manager role. Home Assistant Supervisor
+injects a short-lived SUPERVISOR_TOKEN when the add-on starts. The startup
+script keeps that variable available and sets the Supervisor endpoint to
+http://supervisor, so commands such as ha info and ha core info work in Paseo
+terminals without an interactive login.
+
+The Supervisor token is not stored in /data/paseo-home, a config file, or the
+image. It can rotate when Home Assistant restarts or the add-on updates. The
+manager role gives agents access to Supervisor management commands. Use agent
+approval controls and review commands before execution.
+
 The add-on deliberately does not force Codex login during startup. Authenticate interactively from Paseo's terminal:
 
 ```bash

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.6
+
+- Added the official Home Assistant ha CLI for Supervisor management.
+- Enabled the Home Assistant Supervisor API with the manager role.
+- Authenticated ha automatically from the Supervisor-injected SUPERVISOR_TOKEN.
+- Kept the token ephemeral; it is not written to image layers or persistent
+  add-on data.
+
 ## 0.1.5
 
 - Added the GitHub Copilot CLI as a built-in Paseo provider.

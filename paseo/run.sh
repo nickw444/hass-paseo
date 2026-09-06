@@ -13,6 +13,10 @@ export HOME=/data/paseo-home
 # instead of relying on the base image's login-shell entry so every terminal
 # opened through the web UI starts in Bash.
 export SHELL=/bin/bash
+if [[ -z "${SUPERVISOR_TOKEN:-}" ]]; then
+  fatal "SUPERVISOR_TOKEN is missing. Enable hassio_api access for the add-on."
+fi
+export SUPERVISOR_ENDPOINT="${SUPERVISOR_ENDPOINT:-http://supervisor}"
 export PASEO_HOME="${HOME}/.paseo"
 export CODEX_HOME="${HOME}/.codex"
 export CLAUDE_CONFIG_DIR="${HOME}/.claude"
@@ -52,6 +56,8 @@ copilot_version="$(copilot --version 2>/dev/null || true)"
 [[ -n "${copilot_version}" ]] || fatal "GitHub Copilot CLI is not executable."
 command -v gh >/dev/null 2>&1 || fatal "GitHub CLI is missing from the runtime image."
 gh --version >/dev/null 2>&1 || fatal "GitHub CLI is not executable."
+command -v ha >/dev/null 2>&1 || fatal "Home Assistant CLI is missing from the runtime image."
+ha help >/dev/null 2>&1 || fatal "Home Assistant CLI is not executable."
 codex_version_pin="${CODEX_VERSION:-}"
 [[ -n "${codex_version_pin}" ]] || fatal "CODEX_VERSION is not set in the runtime image."
 
