@@ -33,7 +33,7 @@ The add-on deliberately does not force Codex login during startup. Authenticate 
 codex login --device-auth
 ```
 
-Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentials use `/data/paseo-home/.claude`; and OpenCode and Pi use the persistent HOME/XDG directories under `/data/paseo-home`. Paseo state and relay pairing persist below `/data/paseo-home/.paseo`.
+Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentials use `/data/paseo-home/.claude`; GitHub Copilot uses `/data/paseo-home/.copilot`; Cursor uses the persistent HOME/XDG paths, including `/data/paseo-home/.config/cursor` and `/data/paseo-home/.cursor`; and OpenCode and Pi use the persistent HOME/XDG directories under `/data/paseo-home`. Paseo state and relay pairing persist below `/data/paseo-home/.paseo`.
 
 GitHub CLI authentication uses `GH_CONFIG_DIR=/data/paseo-home/.config/gh`.
 SSH keys, SSH configuration, and `known_hosts` use `/data/paseo-home/.ssh`.
@@ -83,11 +83,29 @@ disabled, and Home Assistant MCP writes require approval.
 
 Paseo injects its own capability-scoped `paseo` MCP server into launched agents while preserving the global `home_assistant` MCP server.
 
-The image includes four provider choices: Codex (`codex`), Claude Code
-(`claude`), OpenCode (`opencode`), and Pi (`pi`). Each provider still requires
-its own native login or API configuration; installing a CLI does not
-authenticate it automatically. Codex login is performed from the Paseo
-terminal as described above.
+The image includes six provider choices: Codex (`codex`), Claude Code
+(`claude`), OpenCode (`opencode`), Pi (`pi`), GitHub Copilot (`copilot`), and
+Cursor (`cursor-agent`). Each provider still requires its own native login or
+API configuration; installing a CLI does not authenticate it automatically.
+Codex login is performed from the Paseo terminal as described above.
+
+To authenticate GitHub Copilot from the Paseo terminal, use the device flow:
+
+```bash
+copilot login --device-code
+```
+
+Copilot stores its configuration and authentication below
+`/data/paseo-home/.copilot`. An active GitHub Copilot subscription is required.
+Do not assume that GitHub CLI authentication alone means that Copilot CLI is
+authenticated.
+
+To use Cursor, open Paseo's provider catalog and select **Cursor**. Paseo
+launches its ACP command as `cursor-agent acp`. Authenticate from the Paseo
+terminal with `cursor-agent login`, or provide `CURSOR_API_KEY` for a headless
+workflow. Cursor configuration and authentication remain below the persistent
+`/data/paseo-home` directory. Cursor Agent is a beta service and requires a
+Cursor account or API access.
 
 ## Agent tooling
 

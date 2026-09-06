@@ -39,6 +39,10 @@ ARG CODEX_RELEASE_TAG=rust-v0.152.1
 ARG CLAUDE_CODE_VERSION=2.1.259
 ARG OPENCODE_VERSION=1.18.27
 ARG PI_CODING_AGENT_VERSION=0.73.1
+ARG COPILOT_CLI_VERSION=1.0.83
+ARG CURSOR_AGENT_VERSION=2026.09.02-c22c1a3
+ARG CURSOR_AGENT_SHA256_AMD64=b73b59854762535c0fc20d7ccc51c3b5a356a851491088d60a362be48750f53c
+ARG CURSOR_AGENT_SHA256_AARCH64=fb7bc635be6172ebcf68f907fd9217e3614da51916455c6d7fdb66690997884c
 
 USER root
 ENV HOME=/data/paseo-home \
@@ -46,6 +50,8 @@ ENV HOME=/data/paseo-home \
     PASEO_HOME=/data/paseo-home/.paseo \
     CODEX_HOME=/data/paseo-home/.codex \
     GH_CONFIG_DIR=/data/paseo-home/.config/gh \
+    COPILOT_HOME=/data/paseo-home/.copilot \
+    COPILOT_CACHE_HOME=/data/paseo-home/.cache/copilot \
     CODEX_VERSION=${CODEX_VERSION} \
     CLAUDE_CONFIG_DIR=/data/paseo-home/.claude \
     XDG_CONFIG_HOME=/data/paseo-home/.config \
@@ -112,19 +118,43 @@ RUN set -eux; \
     /usr/local/bin/codex app-server --help >/dev/null; \
     rm -rf /tmp/codex
 
+# Install the official Cursor Agent CLI as an immutable, architecture-specific
+# release. The moving installer is intentionally not used in the image build.
+RUN set -eux; \
+    case "${BUILD_ARCH}" in \
+      amd64) cursor_arch=x64; cursor_sha="${CURSOR_AGENT_SHA256_AMD64}" ;; \
+      aarch64) cursor_arch=arm64; cursor_sha="${CURSOR_AGENT_SHA256_AARCH64}" ;; \
+      *) echo "Unsupported BUILD_ARCH: ${BUILD_ARCH}" >&2; exit 1 ;; \
+    esac; \
+    archive="/tmp/cursor-agent-package.tar.gz"; \
+    mkdir -p "/opt/cursor-agent/${CURSOR_AGENT_VERSION}"; \
+    curl --fail --location --retry 3 \
+      --output "${archive}" \
+      "https://downloads.cursor.com/lab/${CURSOR_AGENT_VERSION}/linux/${cursor_arch}/agent-cli-package.tar.gz"; \
+    printf '%s  %s\n' "${cursor_sha}" "${archive}" | sha256sum -c -; \
+    tar --strip-components=1 -xzf "${archive}" -C "/opt/cursor-agent/${CURSOR_AGENT_VERSION}"; \
+    test -x "/opt/cursor-agent/${CURSOR_AGENT_VERSION}/cursor-agent"; \
+    ln -sfn "/opt/cursor-agent/${CURSOR_AGENT_VERSION}/cursor-agent" /usr/local/bin/cursor-agent; \
+    ln -sfn "/opt/cursor-agent/${CURSOR_AGENT_VERSION}/cursor-agent" /usr/local/bin/agent; \
+    test -n "$(cursor-agent --version)"; \
+    rm -f "${archive}"
+
 # Install the provider CLIs from their official, version-pinned npm packages.
-# Their postinstall scripts select the native Linux binary for the target
-# architecture (Claude and OpenCode) while Pi is a Node CLI.
+# Their postinstall scripts select native binaries for the target architecture
+# where required; Pi remains a Node CLI.
 RUN npm install --global --no-fund --no-audit \
       "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
       "opencode-ai@${OPENCODE_VERSION}" \
       "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" \
+      "@github/copilot@${COPILOT_CLI_VERSION}" \
     && command -v claude \
     && command -v opencode \
     && command -v pi \
+    && command -v copilot \
     && claude --version \
     && opencode --version \
-    && pi --version
+    && pi --version \
+    && copilot --version
 
 COPY --from=paseo-web-builder /tmp/paseo-src/packages/app/dist /opt/hass-paseo-web-ui
 COPY nginx.conf /paseo-nginx.conf

@@ -14,6 +14,7 @@ This add-on integrates the [Paseo Coding Agent Orchestrator](https://github.com/
 - Uses `/config` as the initial coding project.
 - Stores Paseo state and sessions in the add-on data directory.
 - Provides multiple coding-agent providers, GitHub CLI, and common shell tools.
+- Includes Cursor and GitHub Copilot provider backends.
 - Supports Paseo remote-device pairing and encrypted relay access.
 - Provides an option to start the Codex Remote Control daemon for native Codex clients.
 

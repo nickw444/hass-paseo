@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.5
+
+- Added the GitHub Copilot CLI as a built-in Paseo provider.
+- Added the Cursor Agent CLI for Paseo's ACP provider catalog.
+- Pinned the Cursor Agent release and verified its amd64 and aarch64 archives
+  with SHA-256 checksums.
+- Persisted Cursor and GitHub Copilot configuration and authentication below
+  the add-on data directory.
+
 ## 0.1.4
 
 - Added the GitHub CLI for repository, issue, pull request, and GitHub API
