@@ -55,11 +55,6 @@ directories and sets restrictive directory permissions. It does not generate,
 copy, or overwrite authentication files or SSH keys. Treat these paths as
 secrets and include them in the add-on backup policy.
 
-OpenSSH uses the root account's passwd home for the default ssh-keygen path.
-The add-on maps /root/.ssh to /data/paseo-home/.ssh, so a prompt that shows
-/root/.ssh/id_rsa still writes to persistent add-on storage. Use an explicit
-file path such as /data/paseo-home/.ssh/id_ed25519 when you want a named key.
-
 Authenticate GitHub CLI from the Paseo terminal with `gh auth login`. Select
 SSH as the Git protocol if you want GitHub CLI to use an SSH key. Use
 `--skip-ssh-key` if you want to manage the key yourself. Do not put a token in

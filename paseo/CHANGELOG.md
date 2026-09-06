@@ -2,10 +2,7 @@
 
 ## 0.1.7
 
-- Mapped /root/.ssh to the persistent add-on SSH directory.
-- Migrated existing root SSH files without overwriting conflicting persistent
-  files.
-- Made default ssh-keygen, SSH, Git, and known-host paths survive updates.
+- Persisted SSH, Git, and known-host paths in the add-on data directory.
 
 ## 0.1.6
 

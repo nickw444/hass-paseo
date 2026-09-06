@@ -66,6 +66,7 @@ grep -q 'ha help' "${root}/run.sh"
 grep -q 'ensure_root_ssh_path' "${root}/run.sh"
 grep -q 'readlink -f' "${root}/run.sh"
 grep -q 'ln -s' "${root}/run.sh"
+if grep -Eq 'migrat|cmp -s|mv --|rmdir "\$\{root_ssh\}"' "${root}/run.sh" "${root}/DOCS.md" "${root}/CHANGELOG.md"; then exit 1; fi
 grep -q 'GH_CONFIG_DIR=/data/paseo-home/.config/gh' "${root}/DOCS.md"
 grep -q '/data/paseo-home/.ssh' "${root}/DOCS.md"
 grep -q '/data/paseo-home/.copilot' "${root}/DOCS.md"
