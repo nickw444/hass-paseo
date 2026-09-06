@@ -25,6 +25,7 @@ export GH_CONFIG_DIR="${XDG_CONFIG_HOME}/gh"
 export XDG_CACHE_HOME="${HOME}/.cache"
 export COPILOT_HOME="${HOME}/.copilot"
 export COPILOT_CACHE_HOME="${XDG_CACHE_HOME}/copilot"
+export PI_CODING_AGENT_DIR="${HOME}/.pi/agent"
 export XDG_DATA_HOME="${HOME}/.local/share"
 export XDG_STATE_HOME="${HOME}/.local/state"
 export PASEO_LISTEN=127.0.0.1:6767
@@ -36,6 +37,8 @@ export PASEO_WEB_UI_ENABLED=true
 export PASEO_WEB_UI_DIST_DIR=/opt/hass-paseo-web-ui
 export PASEO_LOG_FORMAT=json
 export PASEO_LOG_LEVEL=info
+# shellcheck disable=SC1091
+source /usr/local/lib/hass-paseo/mcp-config.sh
 
 command -v paseo >/dev/null 2>&1 || fatal "Paseo CLI/daemon host is missing from the runtime image."
 command -v nginx >/dev/null 2>&1 || fatal "Nginx is missing from the runtime image."
@@ -61,8 +64,29 @@ ha help >/dev/null 2>&1 || fatal "Home Assistant CLI is not executable."
 codex_version_pin="${CODEX_VERSION:-}"
 [[ -n "${codex_version_pin}" ]] || fatal "CODEX_VERSION is not set in the runtime image."
 
-mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
+check_codex_sandbox() {
+  local candidate probe_output reason
+  local -a bwrap_candidates
+  bwrap_candidates=("$(command -v bwrap)")
+  if [[ -x /opt/codex/codex-resources/bwrap ]]; then
+    bwrap_candidates+=(/opt/codex/codex-resources/bwrap)
+  fi
+
+  for candidate in "${bwrap_candidates[@]}"; do
+    probe_output="$(mktemp)"
+    if ! "${candidate}" --unshare-user --ro-bind / / --unshare-net /bin/true \
+      >/dev/null 2>"${probe_output}"; then
+      reason="$(tr '\n' ' ' <"${probe_output}" | sed 's/[[:space:]]\+/ /g; s/^ //; s/ $//')"
+      rm -f "${probe_output}"
+      fatal "Codex sandbox preflight failed for ${candidate}: ${reason:-unknown error}. Check that the host permits user namespaces, SYS_ADMIN, and the Paseo AppArmor profile."
+    fi
+    rm -f "${probe_output}"
+  done
+}
+
+mkdir -p "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${PI_CODING_AGENT_DIR}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh" "${XDG_CONFIG_HOME}" "${XDG_CACHE_HOME}" "${XDG_DATA_HOME}" "${XDG_STATE_HOME}"
 chmod 700 "${HOME}" "${PASEO_HOME}" "${CODEX_HOME}" "${CLAUDE_CONFIG_DIR}" "${GH_CONFIG_DIR}" "${COPILOT_HOME}" "${COPILOT_CACHE_HOME}" "${HOME}/.cursor" "${XDG_CONFIG_HOME}/cursor" "${HOME}/.ssh"
+chmod 700 "${PI_CODING_AGENT_DIR}"
 
 ensure_root_ssh_path() {
   local root_ssh=/root/.ssh
@@ -85,6 +109,7 @@ ensure_root_ssh_path() {
 ensure_root_ssh_path
 
 [[ -d /config && -w /config ]] || fatal "/config is not present or is not writable. Check the homeassistant_config map."
+check_codex_sandbox
 
 options_file=/data/options.json
 [[ -r "${options_file}" ]] || fatal "Home Assistant options file is missing at ${options_file}."
@@ -121,6 +146,7 @@ if [[ -n "${mcp_url}" ]]; then
     200|400|405|406) ;;
     *) fatal "HA-MCP endpoint is unreachable or invalid (HTTP ${probe_status:-000})." ;;
   esac
+  configure_provider_mcp "${mcp_url}"
   toml_url="$(jq -Rn --arg value "${mcp_url}" '$value')"
   cat >>"${config_tmp}" <<EOF
 
@@ -132,10 +158,13 @@ startup_timeout_sec = 30
 tool_timeout_sec = 120
 EOF
 else
+  configure_provider_mcp ""
   echo "[INFO] Home Assistant MCP is disabled because ha_mcp_url is empty." >&2
 fi
 chmod 600 "${config_tmp}"
 mv -f "${config_tmp}" "${CODEX_HOME}/config.toml"
+
+ensure_pi_mcp_adapter
 
 if [[ ! -f "${PASEO_HOME}/config.json" ]]; then
   paseo_tmp="$(mktemp "${PASEO_HOME}/config.json.XXXXXX")"

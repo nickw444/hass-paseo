@@ -93,7 +93,33 @@ URL. Codex receives the same safety policy as the reference `hass-codex`
 add-on: workspace writes are limited to `/config`, network access is
 disabled, and Home Assistant MCP writes require approval.
 
-Paseo injects its own capability-scoped `paseo` MCP server into launched agents while preserving the global `home_assistant` MCP server.
+When the URL is set, the add-on writes the `home_assistant` server to the
+native user configuration for each built-in provider. It preserves unrelated
+settings and stores a small ownership record below `/data/paseo-home/.paseo`.
+If the option is later cleared, the add-on restores an entry that it created
+unless the user changed that entry. The URL is not printed in logs.
+
+The provider files are:
+
+- Codex: `/data/paseo-home/.codex/config.toml`.
+- Claude Code: `/data/paseo-home/.claude.json`.
+- OpenCode 1.18: `/data/paseo-home/.config/opencode/opencode.json`.
+- Cursor Agent: `/data/paseo-home/.cursor/mcp.json`.
+- GitHub Copilot: `/data/paseo-home/.copilot/mcp-config.json`.
+- Pi: `/data/paseo-home/.pi/agent/mcp.json`.
+
+The add-on includes the pinned `pi-mcp-adapter` extension and registers it in
+Pi's persistent settings. This enables Pi's native MCP support. Paseo also
+adds its own capability-scoped `paseo` MCP server to launched agents by its
+normal upstream mechanism. The Home Assistant entry remains a provider-owned
+configuration entry, so it is also available to provider sessions started in
+the Paseo terminal.
+
+The add-on uses the provider-native schemas. Claude uses an HTTP entry with
+`type` and `url`, OpenCode 1.18 uses `mcp.home_assistant` with
+`type: "remote"`, Copilot uses `type: "http"` and `tools: ["*"]`, and Pi
+uses its adapter's `url`, `auth: false`, and `oauth: false` fields. See the
+[Claude MCP documentation](https://code.claude.com/docs/en/mcp), [OpenCode MCP documentation](https://opencode.ai/v2/docs/mcp-servers), [Cursor MCP documentation](https://prod.cursor.com/docs/mcp), and [Copilot CLI MCP documentation](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers) for the native formats.
 
 The image includes six provider choices: Codex (`codex`), Claude Code
 (`claude`), OpenCode (`opencode`), Pi (`pi`), GitHub Copilot (`copilot`), and
@@ -128,6 +154,26 @@ environments, `tree`, `less`, and common tar/zip/bzip2/xz utilities. `fd` is
 provided as a compatibility alias for Debian's `fdfind`. These tools do not
 change the Codex policy: Codex agents remain restricted to `/config` for
 writes and have network access disabled.
+
+## Codex sandbox
+
+The add-on requests the `SYS_ADMIN` capability and ships a custom Home
+Assistant AppArmor profile in `apparmor.txt`. These permissions let Codex use
+bubblewrap to create its inner Linux sandbox. The add-on does not enable
+`full_access`, host networking, or unrestricted Codex access.
+
+At startup, the add-on runs a bubblewrap preflight check. If the host kernel,
+container runtime, or Supervisor security policy does not allow the required
+user and network namespaces, startup stops with a diagnostic. This is safer
+than starting the panel and failing only when an agent reads a file.
+
+The Codex policy remains `workspace-write` with `/config` as the only writable
+root and network access disabled. A Home Assistant OS or Supervisor update can
+change the available namespace policy. If the preflight fails, review the
+add-on log and confirm that the installation uses a supported Home Assistant
+OS/Supervisor version and a native `amd64` or `aarch64` host. Do not work
+around the failure by enabling Codex Full Access unless you accept that agents
+can access all files and network resources visible inside the container.
 
 ## Troubleshooting
 

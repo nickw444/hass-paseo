@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.9
+
+- Configured the Home Assistant MCP server for the native user configuration
+  of every built-in provider when `ha_mcp_url` is set.
+- Added the pinned Pi MCP adapter so Pi can use the same MCP configuration.
+- Preserved unrelated provider settings and restore add-on-managed entries when
+  Home Assistant MCP is disabled.
+
+## 0.1.8
+
+- Added a Home Assistant AppArmor profile for Codex bubblewrap namespaces.
+- Requested only `SYS_ADMIN` for the add-on runtime.
+- Added a startup preflight that reports unusable host sandbox settings before
+  the Paseo panel starts.
+
 ## 0.1.7
 
 - Persisted SSH, Git, and known-host paths in the add-on data directory.

@@ -6,7 +6,7 @@ on:
       version:
         description: Add-on version to publish (without the leading v)
         required: true
-        default: "0.1.7"
+        default: "0.1.9"
         type: string
   push:
     tags: ["v*.*.*"]
@@ -59,6 +59,7 @@ jobs:
             --build-arg CLAUDE_CODE_VERSION=2.1.259 \
             --build-arg OPENCODE_VERSION=1.18.27 \
             --build-arg PI_CODING_AGENT_VERSION=0.73.1 \
+            --build-arg PI_MCP_ADAPTER_VERSION=1.5.1 \
             --build-arg COPILOT_CLI_VERSION=1.0.83 \
             --build-arg CURSOR_AGENT_VERSION=2026.09.02-c22c1a3 \
             --build-arg CURSOR_AGENT_SHA256_AMD64=b73b59854762535c0fc20d7ccc51c3b5a356a851491088d60a362be48750f53c \

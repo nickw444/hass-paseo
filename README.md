@@ -15,6 +15,8 @@ This add-on integrates the [Paseo Coding Agent Orchestrator](https://github.com/
 - Stores Paseo state and sessions in the add-on data directory.
 - Provides multiple coding-agent providers, the Home Assistant ha CLI, GitHub
   CLI, and common shell tools.
+- Runs Codex with a `/config`-only workspace sandbox and a Home Assistant
+  AppArmor profile for its bubblewrap runtime.
 - Includes Cursor and GitHub Copilot provider backends.
 - Supports Paseo remote-device pairing and encrypted relay access.
 - Provides an option to start the Codex Remote Control daemon for native Codex clients.
@@ -40,7 +42,7 @@ The add-on supports `amd64` and `aarch64`. The add-on registers `/config` as a P
 
 ## Home Assistant MCP
 
-`ha_mcp_url` is optional. Leave this option empty to disable Home Assistant MCP. Set this option to the endpoint provided by your MCP server. The add-on validates the URL at startup. The add-on does not print the URL in the logs.
+`ha_mcp_url` is optional. Leave this option empty to disable Home Assistant MCP. Set this option to the endpoint provided by your MCP server. When set, the add-on configures the native MCP settings for all built-in Paseo providers. The add-on validates the URL at startup and does not print it in the logs.
 
 For setup and feature details, see the [Home Assistant MCP Server documentation](https://www.home-assistant.io/integrations/mcp_server/) and the [Home Assistant MCP project documentation](https://homeassistant-ai.github.io/ha-mcp/).
 

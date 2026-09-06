@@ -39,6 +39,7 @@ ARG CODEX_RELEASE_TAG=rust-v0.152.1
 ARG CLAUDE_CODE_VERSION=2.1.259
 ARG OPENCODE_VERSION=1.18.27
 ARG PI_CODING_AGENT_VERSION=0.73.1
+ARG PI_MCP_ADAPTER_VERSION=1.5.1
 ARG COPILOT_CLI_VERSION=1.0.83
 ARG CURSOR_AGENT_VERSION=2026.09.02-c22c1a3
 ARG CURSOR_AGENT_SHA256_AMD64=b73b59854762535c0fc20d7ccc51c3b5a356a851491088d60a362be48750f53c
@@ -166,10 +167,12 @@ RUN npm install --global --no-fund --no-audit \
       "opencode-ai@${OPENCODE_VERSION}" \
       "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" \
       "@github/copilot@${COPILOT_CLI_VERSION}" \
+      "pi-mcp-adapter@${PI_MCP_ADAPTER_VERSION}" \
     && command -v claude \
     && command -v opencode \
     && command -v pi \
     && command -v copilot \
+    && test -d /usr/local/lib/node_modules/pi-mcp-adapter \
     && claude --version \
     && opencode --version \
     && pi --version \
@@ -177,8 +180,9 @@ RUN npm install --global --no-fund --no-audit \
 
 COPY --from=paseo-web-builder /tmp/paseo-src/packages/app/dist /opt/hass-paseo-web-ui
 COPY nginx.conf /paseo-nginx.conf
+COPY mcp-config.sh /usr/local/lib/hass-paseo/mcp-config.sh
 COPY run.sh /run.sh
-RUN chmod 0755 /run.sh && mkdir -p /data/paseo-home /var/lib/nginx /var/log/nginx /run/nginx
+RUN chmod 0755 /run.sh /usr/local/lib/hass-paseo/mcp-config.sh && mkdir -p /data/paseo-home /var/lib/nginx /var/log/nginx /run/nginx
 
 WORKDIR /config
 EXPOSE 8099
