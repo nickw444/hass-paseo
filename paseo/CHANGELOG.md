@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.11
+
+- Allowed the native GitHub Copilot runtime to execute under the custom
+  AppArmor profile.
+- Preserved Copilot startup diagnostics when a runtime check fails.
+
 ## 0.1.10
 
 - Fixed add-on startup under the custom AppArmor profile by allowing the

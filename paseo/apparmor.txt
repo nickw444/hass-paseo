@@ -42,6 +42,8 @@ profile paseo flags=(attach_disconnected,mediate_deleted) {
   /bin/** ix,
   /usr/bin/** ix,
   /usr/local/bin/** ix,
+  /usr/local/lib/node_modules/@github/copilot/node_modules/@github/copilot-linux-*/** ix,
+  /usr/local/lib/node_modules/@github/copilot/node_modules/@github/copilot-linuxmusl-*/** ix,
   /opt/** mrix,
 
   # Runtime state, the Home Assistant project, and normal process files.
