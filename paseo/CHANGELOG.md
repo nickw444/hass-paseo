@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.12
+
+- Allowed the Copilot JavaScript launcher to execute through its `/usr/bin/env`
+  entry point under the custom AppArmor profile.
+
 ## 0.1.11
 
 - Allowed the native GitHub Copilot runtime to execute under the custom
