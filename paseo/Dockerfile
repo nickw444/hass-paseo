@@ -1,17 +1,48 @@
 # syntax=docker/dockerfile:1
 
 ARG NODE_IMAGE=node:22-bookworm-slim
-FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS paseo-web-builder
+FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS paseo-deps
 
+ARG BUILDPLATFORM
 ARG PASEO_VERSION=0.7.2
 ARG PASEO_COMMIT=9400a49af670fdb5db4af58e73f8df98588dbea9
 ENV ONNXRUNTIME_NODE_INSTALL=skip
 WORKDIR /tmp/paseo-src
-COPY vendor/paseo/ ./
-COPY patches/ /tmp/paseo-patches/
 
 RUN apt-get update && apt-get install -y --no-install-recommends git patch ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# Keep dependency installation independent from the application source. npm ci
+# needs every declared workspace manifest, and Paseo's root postinstall applies
+# patches from its own patches/ directory.
+COPY vendor/paseo/package.json vendor/paseo/package-lock.json ./
+COPY vendor/paseo/packages/app/package.json packages/app/package.json
+COPY vendor/paseo/packages/cli/package.json packages/cli/package.json
+COPY vendor/paseo/packages/client/package.json packages/client/package.json
+COPY vendor/paseo/packages/desktop/package.json packages/desktop/package.json
+COPY vendor/paseo/packages/expo-two-way-audio/package.json packages/expo-two-way-audio/package.json
+COPY vendor/paseo/packages/highlight/package.json packages/highlight/package.json
+COPY vendor/paseo/packages/plugin/package.json packages/plugin/package.json
+COPY vendor/paseo/packages/protocol/package.json packages/protocol/package.json
+COPY vendor/paseo/packages/relay/package.json packages/relay/package.json
+COPY vendor/paseo/packages/server/package.json packages/server/package.json
+COPY vendor/paseo/packages/website/package.json packages/website/package.json
+COPY vendor/paseo/scripts/postinstall-patches.mjs scripts/postinstall-patches.mjs
+COPY vendor/paseo/patches/ patches/
+
+RUN set -eux; \
+    test "$(node -p "require('./package.json').version")" = "${PASEO_VERSION}"; \
+    node -e 'const fs=require("node:fs"); const p=JSON.parse(fs.readFileSync("package.json","utf8")); delete p.scripts.prepare; fs.writeFileSync("package.json", JSON.stringify(p)+"\n")'
+
+RUN --mount=type=cache,id=paseo-npm-${BUILDPLATFORM},target=/root/.npm \
+    npm ci
+
+FROM paseo-deps AS paseo-web-builder
+
+ARG PASEO_VERSION=0.7.2
+WORKDIR /tmp/paseo-src
+COPY vendor/paseo/ ./
+COPY patches/ /tmp/paseo-patches/
 
 RUN set -eux; \
     test "$(node -p "require('./package.json').version")" = "${PASEO_VERSION}"; \
@@ -19,8 +50,7 @@ RUN set -eux; \
     git apply --check /tmp/paseo-patches/0001-ingress-base-url-build.patch; \
     git apply --check /tmp/paseo-patches/0002-ingress-websocket-path.patch; \
     git apply /tmp/paseo-patches/0001-ingress-base-url-build.patch; \
-    git apply /tmp/paseo-patches/0002-ingress-websocket-path.patch; \
-    npm ci
+    git apply /tmp/paseo-patches/0002-ingress-websocket-path.patch
 
 RUN set -eux; \
     test "$(node -p "require('./node_modules/expo-router/package.json').version")" = "6.0.23"; \
@@ -33,6 +63,7 @@ RUN CI=1 EXPO_NO_TELEMETRY=1 PASEO_WEB_BASE_URL=/__PASEO_INGRESS__ npm run build
 FROM ghcr.io/getpaseo/paseo:0.7.2
 
 ARG PASEO_VERSION=0.7.2
+ARG TARGETPLATFORM
 ARG BUILD_ARCH
 ARG CODEX_VERSION=0.152.1
 ARG CODEX_RELEASE_TAG=rust-v0.152.1
@@ -162,7 +193,8 @@ RUN set -eux; \
 # Install the provider CLIs from their official, version-pinned npm packages.
 # Their postinstall scripts select native binaries for the target architecture
 # where required; Pi remains a Node CLI.
-RUN npm install --global --no-fund --no-audit \
+RUN --mount=type=cache,id=paseo-npm-${TARGETPLATFORM},target=/root/.npm \
+    npm install --global --no-fund --no-audit \
       "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
       "opencode-ai@${OPENCODE_VERSION}" \
       "@mariozechner/pi-coding-agent@${PI_CODING_AGENT_VERSION}" \

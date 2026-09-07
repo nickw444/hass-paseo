@@ -6,7 +6,7 @@ on:
       version:
         description: Add-on version to publish (without the leading v)
         required: true
-        default: "0.1.15"
+        default: "0.1.16"
         type: string
   push:
     tags: ["v*.*.*"]
@@ -51,6 +51,8 @@ jobs:
           docker buildx build \
             --platform "${PLATFORM}" \
             --file paseo/Dockerfile \
+            --cache-from "type=gha,scope=hass-paseo-${ARCH}" \
+            --cache-to "type=gha,mode=max,scope=hass-paseo-${ARCH}" \
             --build-arg BUILD_ARCH="${ARCH}" \
             --build-arg PASEO_VERSION=0.7.2 \
             --build-arg PASEO_COMMIT=9400a49af670fdb5db4af58e73f8df98588dbea9 \

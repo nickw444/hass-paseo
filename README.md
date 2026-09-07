@@ -29,6 +29,14 @@ the security boundary and back up `/config` before allowing agents to edit it.
 
 ## Install
 
+Use this link to add the repository to Home Assistant:
+
+[![Add the Paseo repository to Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fnickw444%2Fhass-paseo)
+
+You can also [open the Home Assistant app store](https://my.home-assistant.io/redirect/supervisor_store/).
+If a My Home Assistant link does not open your instance, use the manual steps
+below.
+
 1. Copy the repository URL: `https://github.com/nickw444/hass-paseo`.
 
 2. In Home Assistant, go to **Settings** > **Apps**.

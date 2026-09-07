@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.16
+
+- Cache Paseo dependency installation separately from the web source build.
+- Persist architecture-specific BuildKit caches in GitHub Actions.
+
 ## 0.1.15
 
 - Run Codex without its nested Linux bubblewrap sandbox.
