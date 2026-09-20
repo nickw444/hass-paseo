@@ -113,8 +113,10 @@ cli_auth_credentials_store = "file"
 
 # Paseo launches Codex through app-server. Keep live web search enabled for
 # those sessions while Codex runs inside the add-on container boundary.
+web_search = "live"
+
 [features]
-web_search_request = true
+apps = false
 
 [projects."/config"]
 trust_level = "trusted"
@@ -144,7 +146,7 @@ else
 fi
 chmod 600 "${config_tmp}"
 mv -f "${config_tmp}" "${CODEX_HOME}/config.toml"
-if ! codex features list 2>/dev/null | grep -Eq '^web_search_request[[:space:]].*true$'; then
+if ! grep -Eq '^web_search = "live"$' "${CODEX_HOME}/config.toml"; then
   fatal "Codex live web search is not enabled by the managed configuration."
 fi
 

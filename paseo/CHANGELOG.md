@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.17
+
+- Disable Codex apps in the managed configuration.
+- Replace the deprecated Codex `web_search_request` feature with
+  `web_search = "live"`.
+
 ## 0.1.16
 
 - Cache Paseo dependency installation separately from the web source build.

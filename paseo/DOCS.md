@@ -50,9 +50,9 @@ Codex credentials persist below `/data/paseo-home/.codex`; Claude Code credentia
 ## Codex web search
 
 The add-on enables Codex live web search in the managed Codex configuration
-with `[features] web_search_request = true`. Paseo-launched Codex agents can
-use the native web search capability after Codex authentication. Search
-availability also depends on the selected Codex model and account.
+with `web_search = "live"`. Paseo-launched Codex agents can use the native
+web search capability after Codex authentication. Search availability also
+depends on the selected Codex model and account.
 
 GitHub CLI authentication uses `GH_CONFIG_DIR=/data/paseo-home/.config/gh`.
 SSH keys, SSH configuration, and `known_hosts` use `/data/paseo-home/.ssh`.
