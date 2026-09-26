@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.18
+
+- Update bundled Codex to 0.157.1, Claude Code to 2.1.283, OpenCode to
+  1.18.32, GitHub Copilot CLI to 1.0.88, and Cursor Agent to
+  2026.09.26-dd393fe.
+
 ## 0.1.17
 
 - Disable Codex apps in the managed configuration.

@@ -1,5 +1,5 @@
 name: Paseo
-version: "0.1.17"
+version: "0.1.18"
 slug: paseo
 description: Paseo coding agent orchestrator for Home Assistant
 url: https://github.com/getpaseo/paseo
