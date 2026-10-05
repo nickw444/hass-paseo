@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.19
+
+- Update bundled Codex to 0.160.0, Claude Code to 2.1.289, OpenCode to
+  1.18.34, GitHub Copilot CLI to 1.0.91, and Cursor Agent to
+  2026.10.01-e373342.
+
 ## 0.1.18
 
 - Update bundled Codex to 0.157.1, Claude Code to 2.1.283, OpenCode to
