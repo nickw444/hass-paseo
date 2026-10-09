@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.20
+
+- Update bundled Codex to 0.162.1, Claude Code to 2.1.296, OpenCode to
+  1.18.35, and GitHub Copilot CLI to 1.0.95.
+
 ## 0.1.19
 
 - Update bundled Codex to 0.160.0, Claude Code to 2.1.289, OpenCode to
