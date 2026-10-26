@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.23
+
+- Update the Paseo runtime and web UI from 0.7.2 to 0.13.1.
+- Adapt foreground daemon startup and the ingress web build for the new
+  Paseo release, preserving Home Assistant ingress paths.
+
 ## 0.1.22
 
 - Update bundled Codex to 0.164.0, Claude Code to 2.1.310, OpenCode to

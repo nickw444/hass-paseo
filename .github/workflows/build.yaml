@@ -6,7 +6,7 @@ on:
       version:
         description: Add-on version to publish (without the leading v)
         required: true
-        default: "0.1.22"
+        default: "0.1.23"
         type: string
   push:
     tags: ["v*.*.*"]
@@ -54,8 +54,8 @@ jobs:
             --cache-from "type=gha,scope=hass-paseo-${ARCH}" \
             --cache-to "type=gha,mode=max,scope=hass-paseo-${ARCH}" \
             --build-arg BUILD_ARCH="${ARCH}" \
-            --build-arg PASEO_VERSION=0.7.2 \
-            --build-arg PASEO_COMMIT=9400a49af670fdb5db4af58e73f8df98588dbea9 \
+            --build-arg PASEO_VERSION=0.13.1 \
+            --build-arg PASEO_COMMIT=20665a18cda5b904064be2f74b97da16cede9255 \
             --build-arg CODEX_VERSION=0.164.0 \
             --build-arg CODEX_RELEASE_TAG=rust-v0.164.0 \
             --build-arg CLAUDE_CODE_VERSION=2.1.310 \

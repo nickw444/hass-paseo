@@ -2,8 +2,8 @@ build_from:
   amd64: ghcr.io/home-assistant/amd64-base:3.22
   aarch64: ghcr.io/home-assistant/aarch64-base:3.22
 args:
-  PASEO_VERSION: "0.7.2"
-  PASEO_COMMIT: "9400a49af670fdb5db4af58e73f8df98588dbea9"
+  PASEO_VERSION: "0.13.1"
+  PASEO_COMMIT: "20665a18cda5b904064be2f74b97da16cede9255"
   CODEX_VERSION: "0.164.0"
   CODEX_RELEASE_TAG: "rust-v0.164.0"
   CLAUDE_CODE_VERSION: "2.1.310"

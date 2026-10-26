@@ -3,7 +3,7 @@
 ## What runs in the container
 
 The browser bundle is not the daemon. On every start, `/run.sh` launches the
-pinned Paseo CLI's real host process with `paseo daemon start --foreground` on
+pinned Paseo CLI's real host process with `paseo daemon run` on
 `127.0.0.1:6767`, waits for `/api/health`, registers `/config` as a project, and
 then starts Nginx on the Home Assistant ingress port `8099`. The supervisor
 exits if either Paseo or Nginx exits. Paseo state, sessions, projects, and

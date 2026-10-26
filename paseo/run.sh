@@ -208,7 +208,7 @@ if [[ -f "${pid_file}" ]]; then
     paseo daemon stop --force --timeout 3 >/dev/null 2>&1 || true
   fi
 fi
-paseo daemon start --foreground >"${HOME}/paseo-daemon.log" 2>&1 &
+paseo daemon run >"${HOME}/paseo-daemon.log" 2>&1 &
 paseo_pid=$!
 
 # The cleanup function is invoked indirectly by the EXIT/INT/TERM trap.

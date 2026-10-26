@@ -11,7 +11,7 @@ if grep -q 'Nick Watts' "${root}/../LICENSE" "${root}/../NOTICE"; then exit 1; f
 grep -q 'Apache License, Version 2.0' "${root}/../NOTICE"
 test -f "${root}/vendor/paseo/LICENSE"
 grep -q '^ingress: true$' "${root}/config.yaml"
-grep -q '^version: "0.1.22"$' "${root}/config.yaml"
+grep -q '^version: "0.1.23"$' "${root}/config.yaml"
 grep -q '^panel_icon: mdi:code-braces$' "${root}/config.yaml"
 if grep -q '^ingress_port:' "${root}/config.yaml"; then exit 1; fi
 if grep -q '^panel_admin:' "${root}/config.yaml"; then exit 1; fi
@@ -46,7 +46,7 @@ grep -q 'COPILOT_CACHE_HOME=/data/paseo-home/.cache/copilot' "${root}/Dockerfile
 grep -q 'PASEO_HOSTNAMES=true' "${root}/run.sh"
 grep -q 'CLAUDE_CONFIG_DIR' "${root}/run.sh"
 grep -q 'has("codex_remote_control")' "${root}/run.sh"
-grep -q 'paseo daemon start --foreground' "${root}/run.sh"
+grep -q 'paseo daemon run' "${root}/run.sh"
 grep -q 'paseo daemon stop --force --timeout 3' "${root}/run.sh"
 grep -q 'lock_cmd' "${root}/run.sh"
 grep -q 'codex-cli\\ \*' "${root}/run.sh"
@@ -132,7 +132,7 @@ grep -q 'sub_filter_types text/css application/javascript text/javascript applic
 grep -q '__PASEO_INITIAL_DAEMON_CONNECTION__' "${root}/nginx.conf"
 grep -q '/__PASEO_INGRESS__/manifest.json' "${root}/patches/0001-ingress-base-url-build.patch"
 grep -q '/__PASEO_INGRESS__/apple-touch-icon.png' "${root}/patches/0001-ingress-base-url-build.patch"
-grep -q 'PASEO_COMMIT: "9400a49af670fdb5db4af58e73f8df98588dbea9"' "${root}/build.yaml"
+grep -q 'PASEO_COMMIT: "20665a18cda5b904064be2f74b97da16cede9255"' "${root}/build.yaml"
 grep -q 'HA_CLI_VERSION: "5.5.0"' "${root}/build.yaml"
 grep -q 'HA_CLI_SHA256_AMD64:' "${root}/build.yaml"
 grep -q 'HA_CLI_SHA256_AARCH64:' "${root}/build.yaml"
@@ -146,7 +146,7 @@ grep -q 'packages: write' "${workflow}"
 grep -q 'linux/amd64' "${workflow}"
 grep -q 'linux/arm64' "${workflow}"
 grep -q 'inputs.version' "${workflow}"
-grep -q 'default: "0.1.22"' "${workflow}"
+grep -q 'default: "0.1.23"' "${workflow}"
 grep -q -- '--cache-from "type=gha,scope=hass-paseo-' "${workflow}"
 grep -q -- '--cache-to "type=gha,mode=max,scope=hass-paseo-' "${workflow}"
 grep -q 'PI_MCP_ADAPTER_VERSION: "1.5.1"' "${root}/build.yaml"
@@ -170,7 +170,7 @@ grep -q 'HA_CLI_SHA256_AMD64=fb2e2177bd7bc014f029b807cd1cc7d74484ecfed1e90d5f9b2
 grep -q 'HA_CLI_SHA256_AARCH64=af390ab7f91a8135668ace7b1425d8e53800b6a1fc3b36fc588df701d2ab3db5' "${workflow}"
 
 if [[ -f "${root}/vendor/paseo/.git" || -d "${root}/vendor/paseo/.git" ]]; then
-  test "$(git -C "${root}/vendor/paseo" rev-parse HEAD)" = "9400a49af670fdb5db4af58e73f8df98588dbea9"
+  test "$(git -C "${root}/vendor/paseo" rev-parse HEAD)" = "20665a18cda5b904064be2f74b97da16cede9255"
   git -C "${root}/vendor/paseo" apply --check "${root}/patches/0001-ingress-base-url-build.patch"
   git -C "${root}/vendor/paseo" apply --check "${root}/patches/0002-ingress-websocket-path.patch"
 fi

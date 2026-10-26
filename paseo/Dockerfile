@@ -4,8 +4,8 @@ ARG NODE_IMAGE=node:22-bookworm-slim
 FROM --platform=$BUILDPLATFORM ${NODE_IMAGE} AS paseo-deps
 
 ARG BUILDPLATFORM
-ARG PASEO_VERSION=0.7.2
-ARG PASEO_COMMIT=9400a49af670fdb5db4af58e73f8df98588dbea9
+ARG PASEO_VERSION=0.13.1
+ARG PASEO_COMMIT=20665a18cda5b904064be2f74b97da16cede9255
 ENV ONNXRUNTIME_NODE_INSTALL=skip
 WORKDIR /tmp/paseo-src
 
@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends git patch ca-ce
 # needs every declared workspace manifest, and Paseo's root postinstall applies
 # patches from its own patches/ directory.
 COPY vendor/paseo/package.json vendor/paseo/package-lock.json ./
+COPY vendor/paseo/plugins/package.json plugins/package.json
 COPY vendor/paseo/packages/app/package.json packages/app/package.json
 COPY vendor/paseo/packages/cli/package.json packages/cli/package.json
 COPY vendor/paseo/packages/client/package.json packages/client/package.json
@@ -39,7 +40,7 @@ RUN --mount=type=cache,id=paseo-npm-${BUILDPLATFORM},target=/root/.npm \
 
 FROM paseo-deps AS paseo-web-builder
 
-ARG PASEO_VERSION=0.7.2
+ARG PASEO_VERSION=0.13.1
 WORKDIR /tmp/paseo-src
 COPY vendor/paseo/ ./
 COPY patches/ /tmp/paseo-patches/
@@ -53,16 +54,16 @@ RUN set -eux; \
     git apply /tmp/paseo-patches/0002-ingress-websocket-path.patch
 
 RUN set -eux; \
-    test "$(node -p "require('./node_modules/expo-router/package.json').version")" = "6.0.23"; \
+    test "$(node -p "require('./node_modules/expo-router/package.json').version")" = "57.0.28"; \
     grep -Fq "const expoPath = expo.getUrlWithReactNavigationConcessions(path);" node_modules/expo-router/build/fork/getStateFromPath.js; \
     patch --batch --forward -p1 < /tmp/paseo-patches/0003-expo-router-root-path.patch; \
     node -e 'const fs=require("node:fs"); const s=fs.readFileSync("node_modules/expo-router/build/fork/getStateFromPath.js","utf8"); if (!s.includes("if (path === '\''//'\''")) throw new Error("router root-path patch was not applied"); if (s.includes("path.replace(/^\\\\/+/, '\''/'\''")) throw new Error("router patch is broader than the exact root guard"); if (!s.includes("protocol-relative URLs")) throw new Error("router patch rationale is missing");'
 
 RUN CI=1 EXPO_NO_TELEMETRY=1 PASEO_WEB_BASE_URL=/__PASEO_INGRESS__ npm run build:web --workspace=@getpaseo/app
 
-FROM ghcr.io/getpaseo/paseo:0.7.2
+FROM ghcr.io/getpaseo/paseo:0.13.1
 
-ARG PASEO_VERSION=0.7.2
+ARG PASEO_VERSION=0.13.1
 ARG TARGETPLATFORM
 ARG BUILD_ARCH
 ARG CODEX_VERSION=0.164.0
