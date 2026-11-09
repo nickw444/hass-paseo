@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.24
+
+- Update the Paseo runtime and matching web UI from 0.13.1 to 0.15.3.
+- Update bundled Codex to 0.167.0, Claude Code to 2.1.319, OpenCode to
+  1.19.5, GitHub Copilot CLI to 1.0.107, and Cursor Agent to
+  2026.11.05-86047df.
+
 ## 0.1.23
 
 - Update the Paseo runtime and web UI from 0.7.2 to 0.13.1.
