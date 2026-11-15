@@ -1,11 +1,11 @@
 ---
 name: agent-binary-release
-description: Bump the Paseo runtime and bundled coding agent CLIs in the Paseo Home Assistant add-on to current stable releases, then publish the next patch release. Use for the scheduled Paseo and agent update and release workflow in this repository.
+description: Bump the Paseo runtime and bundled coding agent CLIs in the Paseo Home Assistant add-on to current stable releases, then publish the next year-week release. Use for the scheduled Paseo and agent update and release workflow in this repository.
 ---
 
 # Paseo runtime and agent binary release
 
-Update the Paseo runtime, its matching web UI source, and the bundled coding agent CLIs in this repository and publish a new add-on patch release. A scheduled invocation of this skill is authorization to publish the update without asking again.
+Update the Paseo runtime, its matching web UI source, and the bundled coding agent CLIs in this repository and publish a new add-on release using `YYYY.WW.N` calendar versions. A scheduled invocation of this skill is authorization to publish the update without asking again.
 
 ## Release procedure
 
@@ -35,7 +35,11 @@ Update the Paseo runtime, its matching web UI source, and the bundled coding age
 
 3. **No-op if all runtime and agent pins match.** Compare the resolved Paseo version and commit, agent versions, and Cursor build ID with the current pins. If none have advanced, make no commit or release and report that the scheduled run found no updates. Do not bump the add-on version just because the schedule ran. Do not downgrade a pin when upstream reports an older version; report the discrepancy.
 
-4. **Choose the next add-on patch version.** Increment the patch component of `paseo/config.yaml` by one, preserving the major and minor components. Confirm that the new `v<version>` tag does not already exist locally or on `origin`.
+4. **Choose the next add-on year-week version.** Use `YYYY.WW.N`, where `YYYY` and `WW` are the ISO week year and ISO week number of the release date in `Australia/Sydney`, and `N` is the release counter within that week. Use numeric components without leading zeroes so the version remains valid SemVer (for example, `2026.42.0` or `2027.1.0`). ISO week years can differ from calendar years near New Year.
+
+   Start at `N=0` for the first release in a new ISO week, including migration from the old `0.1.x` scheme. For further releases in the same week, increment `N` above the highest counter in `paseo/config.yaml` and existing local or origin tags for that week, including tags whose workflows failed. Fetch or inspect origin tags before choosing the counter. Confirm the resulting version increases over the current add-on version and that `v<version>` does not already exist locally or on `origin`; never reuse or move a tag. Keep the workflow-dispatch default, config version, static expectations, and changelog heading synchronized.
+
+   The no-op rule still applies: a new week alone does not trigger a release. An explicit request to migrate version notation and release the current update authorizes that migration even if upstream pins have not advanced.
 
 5. **Update every copy of each changed pin.** Keep these locations synchronized:
 
@@ -64,7 +68,7 @@ Update the Paseo runtime, its matching web UI source, and the bundled coding age
 
 7. **Commit and push the branch and tag.** Use a message such as `chore: update Paseo and bundled coding agents for v<version>`, reflecting what changed. Create an annotated `v<version>` tag on that commit, push `master`, then push the tag. Do not force-push or move an existing tag.
 
-8. **Wait for the tag workflows before publishing the GitHub release.** Find the workflows triggered by `v<version>` and wait for both lint and the amd64 and aarch64 image publishing jobs to finish successfully. The image workflow is the evidence that the Paseo runtime version check, patched web UI, provider packages, architecture-specific archives, checksums, and container images all build. If a workflow fails, do not create the GitHub release or delete/move the tag. Report the failed job and stop so the cause can be fixed in a new patch release. A transient workflow failure may be rerun once if its logs show no source change is needed.
+8. **Wait for the tag workflows before publishing the GitHub release.** Find the workflows triggered by `v<version>` and wait for both lint and the amd64 and aarch64 image publishing jobs to finish successfully. The image workflow is the evidence that the Paseo runtime version check, patched web UI, provider packages, architecture-specific archives, checksums, and container images all build. If a workflow fails, do not create the GitHub release or delete/move the tag. Report the failed job and stop so the cause can be fixed in a new release with the next available calendar-version counter. A transient workflow failure may be rerun once if its logs show no source change is needed.
 
 9. **Create the GitHub release after the workflows pass.** Use the changelog entry as the release notes and the existing pushed `v<version>` tag as the release target. Confirm the release is published, the workflows passed, and the worktree is clean before reporting completion.
 

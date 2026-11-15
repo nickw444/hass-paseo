@@ -6,7 +6,7 @@ on:
       version:
         description: Add-on version to publish (without the leading v)
         required: true
-        default: "0.1.24"
+        default: "2026.46.0"
         type: string
   push:
     tags: ["v*.*.*"]
@@ -54,18 +54,18 @@ jobs:
             --cache-from "type=gha,scope=hass-paseo-${ARCH}" \
             --cache-to "type=gha,mode=max,scope=hass-paseo-${ARCH}" \
             --build-arg BUILD_ARCH="${ARCH}" \
-            --build-arg PASEO_VERSION=0.15.3 \
-            --build-arg PASEO_COMMIT=d91ae138cb931447635e94296023414a58bedcc5 \
-            --build-arg CODEX_VERSION=0.167.0 \
-            --build-arg CODEX_RELEASE_TAG=rust-v0.167.0 \
-            --build-arg CLAUDE_CODE_VERSION=2.1.319 \
+            --build-arg PASEO_VERSION=0.15.4 \
+            --build-arg PASEO_COMMIT=1c00b365c9e0b74c1580eba33d905d693125ae21 \
+            --build-arg CODEX_VERSION=0.169.0 \
+            --build-arg CODEX_RELEASE_TAG=rust-v0.169.0 \
+            --build-arg CLAUDE_CODE_VERSION=2.1.325 \
             --build-arg OPENCODE_VERSION=1.19.5 \
             --build-arg PI_CODING_AGENT_VERSION=0.73.1 \
             --build-arg PI_MCP_ADAPTER_VERSION=1.5.1 \
-            --build-arg COPILOT_CLI_VERSION=1.0.107 \
-            --build-arg CURSOR_AGENT_VERSION=2026.11.05-86047df \
-            --build-arg CURSOR_AGENT_SHA256_AMD64=170b77786cbf4c93064d64fff12b71a178b968730561c64afc2e8e752535442e \
-            --build-arg CURSOR_AGENT_SHA256_AARCH64=131554bfdbf683d8ebfef83a2bb46ac4e5d060f198711040b07ed063c2471871 \
+            --build-arg COPILOT_CLI_VERSION=1.0.112 \
+            --build-arg CURSOR_AGENT_VERSION=2026.11.13-eacade1 \
+            --build-arg CURSOR_AGENT_SHA256_AMD64=c02e4321f20d691ee03af94d29948dc3a81c6c34e7328da7bb1afade4c75812f \
+            --build-arg CURSOR_AGENT_SHA256_AARCH64=e4ba0611045a24d1cf78f021d34c19461680fc7234c19c1f981f1cc169f70cdc \
             --build-arg HA_CLI_VERSION=5.5.0 \
             --build-arg HA_CLI_SHA256_AMD64=fb2e2177bd7bc014f029b807cd1cc7d74484ecfed1e90d5f9b2a61d65ff5393d \
             --build-arg HA_CLI_SHA256_AARCH64=af390ab7f91a8135668ace7b1425d8e53800b6a1fc3b36fc588df701d2ab3db5 \

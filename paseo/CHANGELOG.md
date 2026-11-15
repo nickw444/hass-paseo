@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.46.0
+
+- Adopt ISO year-week release versions (`YYYY.WW.N`), with a counter for
+  additional releases within each week.
+- Update the Paseo runtime and matching web UI from 0.15.3 to 0.15.4.
+- Update bundled Codex to 0.169.0, Claude Code to 2.1.325, GitHub Copilot
+  CLI to 1.0.112, and Cursor Agent to 2026.11.13-eacade1.
+
 ## 0.1.24
 
 - Update the Paseo runtime and matching web UI from 0.13.1 to 0.15.3.
